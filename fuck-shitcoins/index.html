@@ -1,0 +1,608 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ONCHAIN ZAPS — wen moon</title>
+  <style>
+    :root {
+      --doge-font: "Comic Neue", "Comic Sans MS", "Chalkboard SE", "Marker Felt", cursive, sans-serif;
+      --serious-font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Inter, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: #0a0a0a;
+      color: #fff;
+      font-family: var(--doge-font);
+    }
+
+    /* Slide chrome */
+    .deck {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .slide {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 4vh 6vw;
+      text-align: center;
+      animation: fadein 0.45s ease both;
+    }
+
+    .slide[data-active] { display: flex; }
+
+    @keyframes fadein {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Counter / hint */
+    .hud {
+      position: fixed;
+      bottom: 16px;
+      right: 20px;
+      font-family: var(--serious-font);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      mix-blend-mode: difference;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    .hint {
+      position: fixed;
+      bottom: 16px;
+      left: 20px;
+      font-family: var(--serious-font);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      mix-blend-mode: difference;
+      user-select: none;
+      pointer-events: none;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       HYPE SLIDES (1, 2, 3) — black + gold + Comic Sans + rockets
+    ════════════════════════════════════════════════════════════════ */
+
+    .hype {
+      background:
+        radial-gradient(ellipse at top, rgba(255,193,7,0.25), transparent 60%),
+        radial-gradient(ellipse at bottom, rgba(255,87,34,0.15), transparent 60%),
+        #0a0a0a;
+      color: #ffd54f;
+    }
+
+    .hype .stack { display: flex; flex-direction: column; align-items: center; gap: 2.2vh; }
+
+    .mega {
+      font-size: clamp(48px, 11vw, 180px);
+      font-weight: 900;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      color: #ffd54f;
+      text-shadow:
+        0 0 20px rgba(255,213,79,0.4),
+        0 4px 0 #b8860b,
+        0 8px 24px rgba(0,0,0,0.6);
+      animation: pulse 1.6s ease-in-out infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1) rotate(-0.5deg); }
+      to   { transform: scale(1.02) rotate(0.5deg); }
+    }
+
+    .sub {
+      font-size: clamp(20px, 3.2vw, 44px);
+      color: #fff;
+      max-width: 80vw;
+    }
+
+    .tiny {
+      font-size: clamp(14px, 1.6vw, 22px);
+      color: rgba(255,255,255,0.7);
+      font-style: italic;
+    }
+
+    .rockets {
+      font-size: clamp(40px, 7vw, 110px);
+      letter-spacing: 0.2em;
+      animation: bobble 1.2s ease-in-out infinite alternate;
+    }
+
+    @keyframes bobble {
+      from { transform: translateY(-6px); }
+      to   { transform: translateY(6px); }
+    }
+
+    /* Tickertape scroller — for that finance-bro CNBC chyron vibe */
+    .ticker {
+      position: absolute;
+      left: 0; right: 0;
+      overflow: hidden;
+      background: rgba(0,0,0,0.45);
+      border-top: 2px solid #ffd54f;
+      border-bottom: 2px solid #ffd54f;
+      padding: 8px 0;
+      font-family: var(--doge-font);
+      font-size: clamp(14px, 1.6vw, 20px);
+      color: #ffd54f;
+      white-space: nowrap;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .ticker-top { top: 4vh; }
+    .ticker-bot { bottom: 4vh; }
+    .ticker-track {
+      display: inline-block;
+      padding-left: 100%;
+      animation: scroll 22s linear infinite;
+    }
+    .ticker-track.rev { animation-direction: reverse; animation-duration: 28s; }
+    .ticker-track span { margin-right: 3em; }
+    @keyframes scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-100%); }
+    }
+
+    /* Floating background emoji — chaos confetti */
+    .confetti {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    .confetti span {
+      position: absolute;
+      font-size: clamp(28px, 4vw, 56px);
+      opacity: 0.25;
+      animation: floaty 6s ease-in-out infinite alternate;
+    }
+    @keyframes floaty {
+      from { transform: translateY(-12px) rotate(-12deg); }
+      to   { transform: translateY(12px)  rotate(12deg); }
+    }
+
+    .hype .stack { position: relative; z-index: 1; }
+
+    /* Wobble for max meme energy */
+    .wobble {
+      display: inline-block;
+      animation: wobble 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes wobble {
+      from { transform: rotate(-3deg) scale(1); }
+      to   { transform: rotate(3deg)  scale(1.06); }
+    }
+
+    .shake {
+      display: inline-block;
+      animation: shake 0.18s linear infinite;
+    }
+    @keyframes shake {
+      0%   { transform: translate(0,0) rotate(0); }
+      25%  { transform: translate(-2px,1px) rotate(-1deg); }
+      50%  { transform: translate(2px,-1px) rotate(1deg); }
+      75%  { transform: translate(-1px,-2px) rotate(-0.5deg); }
+      100% { transform: translate(1px,2px) rotate(0.5deg); }
+    }
+
+    /* Rainbow gradient text — the "few understand" vibe */
+    .rainbow {
+      background: linear-gradient(90deg, #ff006e, #ffbe0b, #8338ec, #3a86ff, #06ffa5, #ff006e);
+      background-size: 300% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: rainbow 3s linear infinite;
+    }
+    @keyframes rainbow {
+      from { background-position: 0% 50%; }
+      to   { background-position: 300% 50%; }
+    }
+
+    /* Slide 2 — coin grid */
+    .coins {
+      display: grid;
+      grid-template-columns: repeat(4, auto);
+      gap: 1.4vh 3vw;
+      font-size: clamp(22px, 3.4vw, 44px);
+      font-weight: 900;
+      color: #ffd54f;
+      text-shadow: 0 2px 0 #b8860b;
+    }
+    .coins span { display: flex; align-items: center; gap: 0.4ch; }
+
+    /* Slide 3 — peak hype + waiting "..." */
+    .wait {
+      margin-top: 6vh;
+      font-family: var(--serious-font);
+      font-size: clamp(16px, 1.8vw, 22px);
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 0.04em;
+      opacity: 0;
+      transition: opacity 0.6s ease 0.3s;
+    }
+    .slide[data-active][data-revealed] .wait { opacity: 1; }
+
+    /* ════════════════════════════════════════════════════════════════
+       PIVOT (4) — instant whiplash: white bg, red, clean serif
+    ════════════════════════════════════════════════════════════════ */
+
+    .pivot {
+      background: #fafafa;
+      color: #111;
+      font-family: var(--serious-font);
+    }
+
+    .pivot .stack { display: flex; flex-direction: column; align-items: center; gap: 3vh; max-width: 900px; }
+
+    .pivot .kicker {
+      font-size: 12px;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: #c62828;
+      font-weight: 700;
+      border: 1.5px solid #c62828;
+      padding: 6px 14px;
+      border-radius: 999px;
+    }
+
+    .pivot h1 {
+      font-size: clamp(40px, 7vw, 96px);
+      font-weight: 800;
+      line-height: 1.02;
+      letter-spacing: -0.02em;
+      color: #111;
+    }
+
+    .pivot .lede {
+      font-size: clamp(18px, 2.2vw, 26px);
+      color: #444;
+      line-height: 1.45;
+      max-width: 720px;
+    }
+
+    .pivot .sig {
+      font-family: var(--doge-font);
+      font-size: 14px;
+      color: #999;
+      font-style: italic;
+      margin-top: 2vh;
+    }
+
+    /* ════════════════════════════════════════════════════════════════
+       RECEIPTS (5) — white bg, dense, the bullet list
+    ════════════════════════════════════════════════════════════════ */
+
+    .receipts {
+      background: #fafafa;
+      color: #111;
+      font-family: var(--serious-font);
+    }
+
+    .receipts .stack {
+      display: flex;
+      flex-direction: column;
+      gap: 3vh;
+      max-width: 1000px;
+      width: 100%;
+      align-items: center;
+    }
+
+    .receipts h2 {
+      font-size: clamp(28px, 4.2vw, 56px);
+      font-weight: 800;
+      letter-spacing: -0.015em;
+      text-align: center;
+      line-height: 1.05;
+    }
+    .receipts h2 .strike { color: #c62828; }
+
+    .receipts ul {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.6vh 3vw;
+      width: 100%;
+      font-size: clamp(15px, 1.6vw, 20px);
+      color: #333;
+    }
+    .receipts li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      line-height: 1.35;
+    }
+    .receipts li::before {
+      content: "✕";
+      color: #c62828;
+      font-weight: 900;
+      flex-shrink: 0;
+      font-size: 1.1em;
+      line-height: 1.2;
+    }
+    .receipts li b { color: #111; font-weight: 700; }
+
+    .receipts .cta {
+      font-size: clamp(24px, 3.4vw, 44px);
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      color: #111;
+      text-align: center;
+      margin-top: 1vh;
+    }
+    .receipts .cta em {
+      font-style: normal;
+      color: #ff8c00;
+      background: linear-gradient(180deg, transparent 62%, rgba(255,140,0,0.25) 62%);
+      padding: 0 6px;
+    }
+
+    .receipts .footer {
+      font-family: var(--doge-font);
+      font-size: 13px;
+      color: #888;
+      font-style: italic;
+      text-align: center;
+    }
+
+    @media (max-width: 700px) {
+      .coins { grid-template-columns: repeat(2, auto); }
+      .receipts ul { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!--
+    SHITCOIN ZAPS — A 5-SLIDE TRAGEDY
+    Run: open index.html in any browser. Navigate: → / Space / click forward, ← back.
+    Pacing target ~5 min: ~50s per hype slide, beat-of-silence pivot, ~90s on receipts.
+    The whole show is the whiplash at slide 4. Sell the hype before you pivot.
+  -->
+
+  <main class="deck" id="deck">
+
+    <!-- ─── Slide 1: COLD OPEN HYPE ───────────────────────────────── -->
+    <section class="slide hype" data-active>
+      <div class="confetti" aria-hidden="true">
+        <span style="top:8%;  left:6%">🚀</span>
+        <span style="top:14%; left:88%; animation-delay:.4s">🐕</span>
+        <span style="top:72%; left:10%; animation-delay:.8s">💎</span>
+        <span style="top:80%; left:82%; animation-delay:1.2s">🌙</span>
+        <span style="top:42%; left:4%;  animation-delay:1.6s">🙌</span>
+        <span style="top:38%; left:92%; animation-delay:2.0s">🦍</span>
+        <span style="top:60%; left:50%; animation-delay:2.4s">🍌</span>
+        <span style="top:6%;  left:48%; animation-delay:2.8s">📈</span>
+      </div>
+
+      <div class="ticker ticker-top">
+        <div class="ticker-track">
+          <span>🚨 BREAKING: SER PUTS NPUB ON 8 CHAINS</span>
+          <span>📈 DOGE +∞%</span>
+          <span>🦍 APES TOGETHER STRONG</span>
+          <span>💎🙌 NEVER SELLING</span>
+          <span>🚀 WAGMI</span>
+          <span>🐕 MUCH CHAIN VERY ZAP</span>
+          <span>📈 DOGE +∞%</span>
+          <span>⚠ ANALYSTS BAFFLED</span>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="rockets shake">🚀🚀🚀</div>
+        <h1 class="mega"><span class="wobble">ONCHAIN</span><br><span class="rainbow">ZAPS</span></h1>
+        <p class="sub">gm ser. it's happening. <b>IT'S ACTUALLY HAPPENING.</b></p>
+        <p class="tiny">a presentation by an anon who shipped it anyway. ngmi if u ignore. 🫵</p>
+      </div>
+
+      <div class="ticker ticker-bot">
+        <div class="ticker-track rev">
+          <span>🐕 1 DOGE = 1 DOGE</span>
+          <span>🌙 WEN LAMBO</span>
+          <span>💎🙌 HODL</span>
+          <span>🦄 THIS IS THE WAY</span>
+          <span>🚀 TO THE MOON</span>
+          <span>📉 BEARS R FOOD</span>
+          <span>🐂 BULLPOSTING ENABLED</span>
+          <span>⚡ SKIP LIGHTNING ITS MID</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Slide 2: FEATURE DUMP ─────────────────────────────────── -->
+    <section class="slide hype">
+      <div class="confetti" aria-hidden="true">
+        <span style="top:10%; left:12%">💰</span>
+        <span style="top:18%; left:80%; animation-delay:.5s">🤑</span>
+        <span style="top:74%; left:8%;  animation-delay:1.0s">🍕</span>
+        <span style="top:82%; left:88%; animation-delay:1.5s">🪙</span>
+      </div>
+
+      <div class="stack">
+        <p class="tiny" style="font-size:clamp(18px,2.2vw,28px)">
+          ser. ur npub is also: <span class="wobble">EIGHT</span> wallets. 🤯
+        </p>
+        <div class="coins">
+          <span>🟠 BTC</span>
+          <span>🐕 DOGE</span>
+          <span>🥈 LTC</span>
+          <span>🟢 BCH</span>
+          <span>🟡 BSV</span>
+          <span>💎 ETH</span>
+          <span>🛡️ ZEC</span>
+          <span>⚛️ ATOM</span>
+        </div>
+        <p class="sub" style="margin-top:3vh; line-height:1.1">
+          <span class="rainbow" style="font-weight:900">FREE BAGS</span><br>
+          <span style="font-size:0.7em">no seed phrase. no setup. no clue.</span>
+        </p>
+        <p class="tiny">
+          much wallet. very chain. wow. such integration. 🐕<br>
+          <b>u literally cannot opt out</b> — congrats ur a multi-chain chad now 🦍🍌
+        </p>
+      </div>
+    </section>
+
+    <!-- ─── Slide 3: PEAK HYPE + tiny "wait" reveal ───────────────── -->
+    <section class="slide hype">
+      <div class="confetti" aria-hidden="true">
+        <span style="top:5%;  left:5%">🚀</span>
+        <span style="top:5%;  left:25%; animation-delay:.2s">🌙</span>
+        <span style="top:5%;  left:45%; animation-delay:.4s">💎</span>
+        <span style="top:5%;  left:65%; animation-delay:.6s">🙌</span>
+        <span style="top:5%;  left:85%; animation-delay:.8s">🚀</span>
+        <span style="top:85%; left:10%; animation-delay:1.0s">🦍</span>
+        <span style="top:85%; left:30%; animation-delay:1.2s">🍌</span>
+        <span style="top:85%; left:50%; animation-delay:1.4s">🐕</span>
+        <span style="top:85%; left:70%; animation-delay:1.6s">📈</span>
+        <span style="top:85%; left:90%; animation-delay:1.8s">🌙</span>
+      </div>
+
+      <div class="stack">
+        <div class="rockets shake">💎🙌 🚀🚀🚀 🌙🌙</div>
+        <h1 class="mega" style="font-size:clamp(40px,9vw,150px)">
+          <span class="wobble">WEN</span> <span class="rainbow">LAMBO</span><span class="shake">?</span>
+        </h1>
+        <p class="sub" style="color:#ffd54f;font-weight:900; font-size:clamp(28px,5vw,72px)">
+          RIGHT. <span class="shake">NOW.</span> ANON.
+        </p>
+        <p class="tiny" style="font-size:clamp(15px,1.8vw,22px)">
+          no LNURL 🚫⚡ &nbsp; no node 🚫🖥️ &nbsp; no brain 🚫🧠<br>
+          just <b>SEND</b>. on chain. forever. publicly. 💯<br>
+          few understand. ur early. 🫡
+        </p>
+        <p class="wait">…wait.</p>
+      </div>
+    </section>
+
+    <!-- ─── Slide 4: THE PIVOT ────────────────────────────────────── -->
+    <section class="slide pivot">
+      <div class="stack">
+        <span class="kicker">⚠ &nbsp; the record scratch</span>
+        <h1>
+          we did<br>something insane.
+        </h1>
+        <p class="lede">
+          We took the worst property of Bitcoin — a transparent,
+          append-only ledger that survives you — and bolted it to the
+          worst property of social media — a single, world-readable
+          public identifier — and shipped it as a feature.
+        </p>
+        <p class="lede" style="font-weight:600;color:#111">
+          On eight chains. At the same time.
+        </p>
+        <p class="sig">…oops.</p>
+      </div>
+    </section>
+
+    <!-- ─── Slide 5: RECEIPTS ─────────────────────────────────────── -->
+    <section class="slide receipts">
+      <div class="stack">
+        <h2>
+          every <span class="strike">onchain zap</span><br>
+          is a permanent, public&nbsp;mistake
+        </h2>
+
+        <ul>
+          <li><span><b>Address reuse for life.</b> Your npub is public. Your address is derived. One address. Forever. For everyone.</span></li>
+          <li><span><b>Free chain-analysis oracle.</b> Every firm on earth gets a deterministic npub→address map. No opting out.</span></li>
+          <li><span><b>Fees &gt; value.</b> 21 sats of love costs ~$2 in mining fees. Lightning fees are sub-satoshi.</span></li>
+          <li><span><b>Latency.</b> Interactive tipping needs sub-second. L1 gives you 10 minutes if the mempool is empty.</span></li>
+          <li><span><b>Forever social graph.</b> Every zap = a signed, timestamped link between two npubs and two on-chain identities.</span></li>
+          <li><span><b>$5 wrench attack.</b> Anyone can compute your net worth from a profile click. That is a physical-safety problem.</span></li>
+          <li><span><b>Dust UTXOs.</b> Receiving 100 sats creates a UTXO that costs more to spend than it contains.</span></li>
+          <li><span><b>One key, one death.</b> Leaked nsec = lost identity AND funds on 8 chains in one event.</span></li>
+        </ul>
+
+        <p class="cta">use <em>Lightning</em>. NIP-57 already solved this.</p>
+        <p class="footer">the rockets above were a joke. the bullets here are not. ✌</p>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="hud" id="hud">1 / 5</div>
+  <div class="hint">← → space · click</div>
+
+  <script>
+    (() => {
+      const slides = Array.from(document.querySelectorAll('.slide'));
+      const hud = document.getElementById('hud');
+      let i = 0;
+
+      // Slide 3 has a delayed "...wait" line. We reveal it the *second*
+      // time the user advances while on slide 3 — so they tap forward
+      // expecting slide 4, get the "wait" beat, then tap again for the
+      // actual pivot. That double-tap is the whole tonal hinge.
+      let revealedWait = false;
+
+      function render() {
+        slides.forEach((s, idx) => {
+          if (idx === i) s.setAttribute('data-active', '');
+          else s.removeAttribute('data-active');
+        });
+        hud.textContent = `${i + 1} / ${slides.length}`;
+      }
+
+      function next() {
+        // Slide 3 (index 2): first advance reveals "...wait", second moves on.
+        if (i === 2 && !revealedWait) {
+          slides[2].setAttribute('data-revealed', '');
+          revealedWait = true;
+          return;
+        }
+        if (i < slides.length - 1) { i++; render(); }
+      }
+
+      function prev() {
+        if (i === 2 && revealedWait) {
+          slides[2].removeAttribute('data-revealed');
+          revealedWait = false;
+          return;
+        }
+        if (i > 0) { i--; render(); }
+      }
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+          e.preventDefault(); next();
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+          e.preventDefault(); prev();
+        } else if (e.key === 'Home') {
+          i = 0; revealedWait = false;
+          slides[2].removeAttribute('data-revealed');
+          render();
+        } else if (e.key === 'End') {
+          i = slides.length - 1; render();
+        }
+      });
+
+      document.addEventListener('click', (e) => {
+        // Right-half click = forward, left-half = back. Keeps it usable
+        // on a touch device / on a projector clicker.
+        const x = e.clientX / window.innerWidth;
+        if (x < 0.25) prev(); else next();
+      });
+
+      render();
+    })();
+  </script>
+</body>
+</html>
