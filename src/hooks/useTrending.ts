@@ -4,7 +4,7 @@ import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import type { NostrEvent } from '@nostrify/nostrify';
 import { useNip85EventStats, useNip85AddrStats } from '@/hooks/useNip85Stats';
 import { type ResolvedEmoji } from '@/lib/customEmoji';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 import { useAppContext } from '@/hooks/useAppContext';
 
 export interface TrendingTag {
@@ -36,8 +36,8 @@ export function useTrendingTags(enabled = true) {
     queryFn: async ({ signal }) => {
       if (!statsPubkey) return { tags: [], labelCreatedAt: 0 };
 
-      const ditto = nostr.group(DITTO_RELAYS);
-      const events = await ditto.query(
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
+      const events = await magikarp.query(
         [{
           kinds: [1985],
           authors: [statsPubkey],
@@ -83,8 +83,8 @@ export function useTrendingPosts(enabled = true) {
     queryFn: async ({ signal }) => {
       if (!statsPubkey) return [];
 
-      const ditto = nostr.group(DITTO_RELAYS);
-      const labelEvents = await ditto.query(
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
+      const labelEvents = await magikarp.query(
         [{
           kinds: [1985],
           authors: [statsPubkey],
@@ -132,8 +132,8 @@ export function useSortedPosts(sort: SortMode, limit = 5, enabled = true) {
   return useQuery<NostrEvent[]>({
     queryKey: ['sorted-posts', sort, limit],
     queryFn: async ({ signal }) => {
-      const ditto = nostr.group(DITTO_RELAYS);
-      const events = await ditto.query(
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
+      const events = await magikarp.query(
         [{ kinds: [1], search: `sort:${sort} protocol:nostr`, limit }],
         { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) },
       );
@@ -157,7 +157,7 @@ export function useInfiniteSortedPosts(sort: SortMode, enabled = true) {
   return useInfiniteQuery<NostrEvent[], Error>({
     queryKey: ['infinite-sorted-posts', sort],
     queryFn: async ({ pageParam, signal }) => {
-      const ditto = nostr.group(DITTO_RELAYS);
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
       const filter: Record<string, unknown> = {
         kinds: [1],
         search: `sort:${sort} protocol:nostr`,
@@ -167,7 +167,7 @@ export function useInfiniteSortedPosts(sort: SortMode, enabled = true) {
         filter.until = pageParam;
       }
 
-      const events = await ditto.query(
+      const events = await magikarp.query(
         [filter as { kinds: number[]; search: string; limit: number; until?: number }],
         { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) },
       );
@@ -205,7 +205,7 @@ export function useInfiniteHotFeed(
   return useInfiniteQuery<NostrEvent[], Error>({
     queryKey: ['infinite-hot-feed', kinds.join(','), limit, extraKey],
     queryFn: async ({ pageParam, signal }) => {
-      const ditto = nostr.group(DITTO_RELAYS);
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
 
       const base: Record<string, unknown> = {
         search: 'sort:hot protocol:nostr',
@@ -223,7 +223,7 @@ export function useInfiniteHotFeed(
         }
       }
 
-      return ditto.query(
+      return magikarp.query(
         filters as { kinds: number[]; search: string; limit: number; until?: number }[],
         { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) },
       );
@@ -320,7 +320,7 @@ const SPARKLINE_DAYS = 7;
 /**
  * Returns UTC-midnight-aligned day boundaries for the 7 days ending at the
  * given reference timestamp (in seconds), oldest first — matching the server's
- * generateDateRange logic in ditto/utils/time.ts.
+ * generateDateRange logic in magikarp/utils/time.ts.
  */
 function generateSparklineDays(refTimestampSecs: number): { since: number; until: number }[] {
   // Strip to UTC midnight of the reference date
@@ -362,7 +362,7 @@ export function useTagSparklines(tags: string[], labelCreatedAt: number, enabled
     queryFn: async ({ signal }) => {
       if (sortedTags.length === 0 || !labelCreatedAt || !statsPubkey) return new Map();
 
-      const ditto = nostr.group(DITTO_RELAYS);
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
 
       // Generate UTC-midnight-aligned day boundaries from the label's created_at
       const days = generateSparklineDays(labelCreatedAt);
@@ -392,7 +392,7 @@ export function useTagSparklines(tags: string[], labelCreatedAt: number, enabled
         })),
       );
 
-      const allEvents = await ditto.query(
+      const allEvents = await magikarp.query(
         filters,
         { signal: AbortSignal.any([signal, AbortSignal.timeout(5000)]) },
       );

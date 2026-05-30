@@ -54,7 +54,7 @@ function postWebUrl(uri: string, handle: string): string {
 }
 
 /** Convert a bsky.app post URL into our /i/ route. */
-function dittoUrl(url: string): string {
+function magikarpUrl(url: string): string {
   return `/i/${encodeURIComponent(url)}`;
 }
 
@@ -93,8 +93,8 @@ function BlueskyFeedPost({ post }: { post: BlueskyPost }) {
   const shareOrigin = useShareOrigin();
 
   const webUrl = postWebUrl(post.uri, post.author.handle);
-  const internalUrl = dittoUrl(webUrl);
-  const profileUrl = dittoUrl(`https://bsky.app/profile/${post.author.handle}`);
+  const internalUrl = magikarpUrl(webUrl);
+  const profileUrl = magikarpUrl(`https://bsky.app/profile/${post.author.handle}`);
   const images = post.embed?.$type === 'app.bsky.embed.images#view' ? (post.embed.images ?? []) : [];
   const externalEmbed = post.embed?.$type === 'app.bsky.embed.external#view' ? post.embed.external : undefined;
 
@@ -340,7 +340,7 @@ function BlueskySearchBar() {
     setDebouncedQuery('');
     setDropdownOpen(false);
     inputRef.current?.blur();
-    navigate(dittoUrl(result.url));
+    navigate(magikarpUrl(result.url));
   }, [navigate]);
 
   const handleClear = useCallback(() => {

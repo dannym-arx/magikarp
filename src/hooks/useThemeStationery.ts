@@ -6,7 +6,7 @@ import { hslStringToHex } from '@/lib/colorUtils';
 import type { Stationery } from '@/lib/letterTypes';
 
 /**
- * Converts the user's currently active Ditto theme into a letter Stationery.
+ * Converts the user's currently active Magikarp theme into a letter Stationery.
  *
  * The mapping:
  *   - Stationery.color      ← theme background color (hex)
@@ -16,7 +16,7 @@ import type { Stationery } from '@/lib/letterTypes';
  *   - Stationery.imageMode  ← theme background mode (cover/tile)
  *   - Stationery.fontFamily ← theme body font-family (if any)
  *
- * This lets letters inherit the user's full Ditto theme — colors, fonts,
+ * This lets letters inherit the user's full Magikarp theme — colors, fonts,
  * and background image — as their default stationery, so letters look
  * native to the user's chosen aesthetic.
  */

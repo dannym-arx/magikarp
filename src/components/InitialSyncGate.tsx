@@ -24,7 +24,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { DittoLogo } from "@/components/DittoLogo";
+import { MagikarpLogo } from "@/components/MagikarpLogo";
 import { ImageCropDialog } from "@/components/ImageCropDialog";
 import { IntroImage } from "@/components/IntroImage";
 import { ProfileCard } from "@/components/ProfileCard";
@@ -169,7 +169,7 @@ function SyncScreen({ phase }: { phase: SyncPhase }) {
         {/* Logo with gentle pulse */}
         <div className="relative">
           <div className="absolute inset-0 rounded-full bg-primary/10 animate-ping opacity-30" />
-          <DittoLogo size={72} className="relative" />
+          <MagikarpLogo size={72} className="relative" />
         </div>
 
         {/* Spinner */}
@@ -460,7 +460,7 @@ function SetupQuestionnaire({
 function KeygenStep({ onGenerate }: { onGenerate: () => void }) {
   return (
     <div className="flex flex-col items-center text-center gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <DittoLogo size={80} />
+      <MagikarpLogo size={80} />
 
       <div className="space-y-3">
         <h1 className="text-2xl font-bold tracking-tight">
@@ -1225,7 +1225,7 @@ function OutroStep({ onComplete }: { onComplete: () => void }) {
   return (
     <div className="flex flex-col items-center text-center gap-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="relative">
-        <DittoLogo size={72} />
+        <MagikarpLogo size={72} />
         <div className="absolute -bottom-1 -right-1 bg-primary/10 rounded-full p-1.5">
           <Heart className="w-5 h-5 text-primary fill-primary" />
         </div>

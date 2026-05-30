@@ -2,9 +2,9 @@ import { useNostr } from '@nostrify/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import type { NostrEvent } from '@nostrify/nostrify';
 
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 
-/** Curated kinds for the Ditto feed: unique Ditto content types. */
+/** Curated kinds for the Magikarp feed: unique Magikarp content types. */
 const CURATED_KINDS = [
   20,    // Photos (NIP-68)
   21,    // Videos (NIP-71)
@@ -44,18 +44,18 @@ function fingerprint(items: string[]): string {
 }
 
 /**
- * Curated Ditto feed: latest content from the curator's follow list.
+ * Curated Magikarp feed: latest content from the curator's follow list.
  * Standard NIP-01 reverse-chronological pagination (no sort:hot).
  *
  * @param authors - Pubkeys whose content to include (from useCuratorFollowList).
  * @param enabled - Whether the query should run.
  */
-export function useCuratedDittoFeed(authors: string[] | undefined, enabled: boolean) {
+export function useCuratedMagikarpFeed(authors: string[] | undefined, enabled: boolean) {
   const { nostr } = useNostr();
   const authorsKey = authors ? fingerprint(authors) : '';
 
   return useInfiniteQuery<NostrEvent[], Error>({
-    queryKey: ['ditto-curated-feed', authorsKey],
+    queryKey: ['magikarp-curated-feed', authorsKey],
     queryFn: async ({ pageParam, signal }) => {
       const base: Record<string, unknown> = {
         kinds: CURATED_KINDS,
@@ -72,9 +72,9 @@ export function useCuratedDittoFeed(authors: string[] | undefined, enabled: bool
       };
       if (pageParam) webxdcFilter.until = pageParam;
 
-      const ditto = nostr.group(DITTO_RELAYS);
-      return ditto.query(
-        [base, webxdcFilter] as Parameters<typeof ditto.query>[0],
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
+      return magikarp.query(
+        [base, webxdcFilter] as Parameters<typeof magikarp.query>[0],
         { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) },
       );
     },

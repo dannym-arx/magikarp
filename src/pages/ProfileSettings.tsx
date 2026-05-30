@@ -919,7 +919,7 @@ function BackupKeySection() {
     </div>
   );
 
-  // Not applicable for extension / bunker logins — key isn't available in Ditto.
+  // Not applicable for extension / bunker logins — key isn't available in Magikarp.
   if (!current) return null;
 
   if (current.type === 'extension') {

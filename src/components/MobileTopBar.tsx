@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { DittoLogo } from '@/components/DittoLogo';
+import { MagikarpLogo } from '@/components/MagikarpLogo';
 import { BarsStaggeredIcon } from '@/components/icons/BarsStaggeredIcon';
 import { ArcBackground } from '@/components/ArcBackground';
 import { useNavHidden } from '@/contexts/LayoutContext';
@@ -43,10 +43,10 @@ export function MobileTopBar({ onAvatarClick, hasSubHeader }: MobileTopBarProps)
             </button>
           </div>
 
-          {/* Center: Ditto logo */}
+          {/* Center: Magikarp logo */}
           <div className="flex-1 flex items-center justify-center">
             <Link to="/" onClick={handleLogoClick}>
-              <DittoLogo size={28} />
+              <MagikarpLogo size={28} />
             </Link>
           </div>
 

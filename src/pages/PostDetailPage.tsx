@@ -2165,7 +2165,7 @@ function PostDetailContent({ event }: { event: NostrEvent }) {
         </div>
       )}
 
-      {/* Main post — expanded Ditto-style view */}
+      {/* Main post — expanded Magikarp-style view */}
       {!isReaction && !isRepost && !isVanish && !isZap && !isOnchainZap && !isProfile && !isPollVote && (
         <article ref={focusedPostRef} className="px-4 pt-3 pb-0">
           {/* Kind action header for app handlers */}

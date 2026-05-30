@@ -15,7 +15,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useAppContext } from '@/hooks/useAppContext';
 import { useFeed } from '@/hooks/useFeed';
 import { useFeedSettings } from '@/hooks/useFeedSettings';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 import { getStorageKey } from '@/lib/storageKey';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useFeedTab } from '@/hooks/useFeedTab';
@@ -25,7 +25,7 @@ import { useTabFeed } from '@/hooks/useProfileFeed';
 import { useSavedFeeds } from '@/hooks/useSavedFeeds';
 import { useResolveTabFilter } from '@/hooks/useResolveTabFilter';
 import { useCuratorFollowList } from '@/hooks/useCuratorFollowList';
-import { useCuratedDittoFeed } from '@/hooks/useCuratedDittoFeed';
+import { useCuratedMagikarpFeed } from '@/hooks/useCuratedMagikarpFeed';
 import { getEnabledFeedKinds } from '@/lib/extraKinds';
 import { diversifyFeedPages } from '@/lib/feedDiversity';
 import { isRepostKind, shouldHideFeedEvent, feedItemKey } from '@/lib/feedUtils';
@@ -37,7 +37,7 @@ import type { FeedItem } from '@/lib/feedUtils';
 import type { NostrEvent } from '@nostrify/nostrify';
 import type { SavedFeed } from '@/contexts/AppContext';
 
-type CoreFeedTab = 'follows' | 'global' | 'communities' | 'ditto';
+type CoreFeedTab = 'follows' | 'global' | 'communities' | 'magikarp';
 type FeedTab = CoreFeedTab | string; // string = saved feed id
 
 interface FeedProps {
@@ -70,8 +70,8 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
     return stored !== null ? stored === 'true' : false;
   })();
 
-  const showDittoFeed = (() => {
-    const stored = localStorage.getItem(getStorageKey(config.appId, 'showDittoFeed'));
+  const showMagikarpFeed = (() => {
+    const stored = localStorage.getItem(getStorageKey(config.appId, 'showMagikarpFeed'));
     return stored !== null ? stored === 'true' : true;
   })();
 
@@ -98,7 +98,7 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
   const { startSignup } = useOnboarding();
 
   // Kind-specific pages only support Follows + Global. Clamp any other
-  // persisted tab (e.g. 'ditto', 'communities') back to the appropriate default.
+  // persisted tab (e.g. 'magikarp', 'communities') back to the appropriate default.
   // Logged-out users must land on 'global' since 'follows' requires a user.
   const activeTab: FeedTab = (() => {
     if (!kinds) return rawActiveTab; // Home feed: no clamping
@@ -123,12 +123,12 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
   // feed instead of the noisy global feed so new visitors see quality content.
   const useTopFeedForLoggedOut = !user && !kinds;
 
-  // When the Ditto tab is active (logged in), show the same hot-sorted curated feed.
-  // Disabled on kind-specific pages — the Ditto tab is not shown there.
-  const useDittoTab = user && activeTab === 'ditto' && !kinds;
+  // When the Magikarp tab is active (logged in), show the same hot-sorted curated feed.
+  // Disabled on kind-specific pages — the Magikarp tab is not shown there.
+  const useMagikarpTab = user && activeTab === 'magikarp' && !kinds;
 
   // Standard feed query (used when logged in, or on kind-specific pages, or core tabs)
-  const isCoreFeedTab = activeTab === 'follows' || activeTab === 'global' || activeTab === 'communities' || activeTab === 'ditto';
+  const isCoreFeedTab = activeTab === 'follows' || activeTab === 'global' || activeTab === 'communities' || activeTab === 'magikarp';
   type UseFeedTab = 'follows' | 'global' | 'communities';
   const feedTabForQuery: UseFeedTab =
     activeTab === 'follows' || activeTab === 'global' || activeTab === 'communities'
@@ -139,18 +139,18 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
     (kinds || tagFilters) ? { kinds, tagFilters } : undefined,
   );
 
-  // Curated Ditto feed: latest content from the curator's follow list.
-  const topQuery = useCuratedDittoFeed(
+  // Curated Magikarp feed: latest content from the curator's follow list.
+  const topQuery = useCuratedMagikarpFeed(
     curatorFollowList,
-    useTopFeedForLoggedOut || !!useDittoTab,
+    useTopFeedForLoggedOut || !!useMagikarpTab,
   );
 
   // Unify the two query shapes behind a single interface
-  const useDittoQuery = useTopFeedForLoggedOut || useDittoTab;
-  const activeQuery = useDittoQuery ? topQuery : feedQuery;
+  const useMagikarpQuery = useTopFeedForLoggedOut || useMagikarpTab;
+  const activeQuery = useMagikarpQuery ? topQuery : feedQuery;
   const queryKey = useMemo(
-    () => useDittoQuery ? ['ditto-curated-feed'] : ['feed', activeTab],
-    [useDittoQuery, activeTab],
+    () => useMagikarpQuery ? ['magikarp-curated-feed'] : ['feed', activeTab],
+    [useMagikarpQuery, activeTab],
   );
 
   const handleRefresh = usePageRefresh(queryKey);
@@ -188,7 +188,7 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
     if (!rawData?.pages) return [];
     const seen = new Set<string>();
 
-    if (useDittoQuery) {
+    if (useMagikarpQuery) {
       // Deduplicate and filter each page independently, then diversify
       // page-by-page so earlier pages never change when new pages arrive.
       const dedupedPages = (rawData.pages as unknown as import('@nostrify/nostrify').NostrEvent[][])
@@ -220,14 +220,14 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
         if (muteItems.length > 0 && isEventMuted(item.event, muteItems)) return false;
         return true;
       });
-  }, [rawData?.pages, muteItems, useDittoQuery]);
+  }, [rawData?.pages, muteItems, useMagikarpQuery]);
 
   // Show skeletons while loading, but not if the curator list query errored
   // (that would leave logged-out users staring at infinite skeletons).
-  const showSkeleton = (isPending || (isLoading && !rawData)) && !(useDittoQuery && isCuratorError);
+  const showSkeleton = (isPending || (isLoading && !rawData)) && !(useMagikarpQuery && isCuratorError);
 
   // Kind-specific pages (e.g. Development, WebXDC) only show Follows + Global tabs.
-  // Extra tabs (Ditto, Community, saved feeds, hashtags) are only for the home feed.
+  // Extra tabs (Magikarp, Community, saved feeds, hashtags) are only for the home feed.
   const isKindSpecificPage = !!kinds;
   const showSavedFeedTabs = user && !isKindSpecificPage && !tagFilters;
 
@@ -249,8 +249,8 @@ export function Feed({ kinds, tagFilters, header, hideCompose, emptyMessage, fee
       {user && (
         <SubHeaderBar>
           <TabButton label="Follows" active={activeTab === 'follows'} onClick={() => handleSetActiveTab('follows')} />
-          {!isKindSpecificPage && showDittoFeed && (
-            <TabButton label={config.appName} active={activeTab === 'ditto'} onClick={() => handleSetActiveTab('ditto')} />
+          {!isKindSpecificPage && showMagikarpFeed && (
+            <TabButton label={config.appName} active={activeTab === 'magikarp'} onClick={() => handleSetActiveTab('magikarp')} />
           )}
           {!isKindSpecificPage && showCommunityFeed && (
             <TabButton label={communityLabel} active={activeTab === 'communities'} onClick={() => handleSetActiveTab('communities')} />
@@ -375,7 +375,7 @@ function SavedFeedContent({ feed }: { feed: SavedFeed }) {
     user?.pubkey ?? '',
   );
 
-  // Augment the resolved filter with protocol:nostr (NIP-50 Ditto extension)
+  // Augment the resolved filter with protocol:nostr (NIP-50 Magikarp extension)
   // to match the behavior of the core feeds and ensure latest native Nostr
   // posts are returned.
   const augmentedFilter = useMemo(() => {
@@ -491,8 +491,8 @@ function HashtagFeedContent({ tag }: { tag: string }) {
   const { data: events, isLoading } = useQuery<NostrEvent[]>({
     queryKey,
     queryFn: async ({ signal }) => {
-      const ditto = nostr.group(DITTO_RELAYS);
-      return ditto.query(
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
+      return magikarp.query(
         [{ kinds, '#t': [tag.toLowerCase()], limit: 40 }],
         { signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]) },
       );
@@ -548,10 +548,10 @@ function GeotagFeedContent({ tag }: { tag: string }) {
   const { data: events, isLoading } = useQuery<NostrEvent[]>({
     queryKey,
     queryFn: async ({ signal }) => {
-      const ditto = nostr.group(DITTO_RELAYS);
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
       const filter = { kinds, limit: 40 } as Record<string, unknown>;
       filter['#g'] = [tag];
-      return ditto.query([filter as Parameters<typeof ditto.query>[0][number]], {
+      return magikarp.query([filter as Parameters<typeof magikarp.query>[0][number]], {
         signal: AbortSignal.any([signal, AbortSignal.timeout(10000)]),
       });
     },

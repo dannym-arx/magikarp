@@ -9,18 +9,26 @@ import { useFollowList } from './useFollowActions';
 import { getEffectiveRelays } from '@/lib/appRelays';
 import { getEnabledNotificationKinds } from '@/lib/notificationKinds';
 
-/** Interface for the native DittoNotification Capacitor plugin. */
-interface DittoNotificationPlugin {
+/**
+ * Interface for the native notification Capacitor plugin.
+ *
+ * NOTE: the registration string below MUST stay `'DittoNotification'` — it is
+ * the bridge identifier hard-coded in the native Android (`@CapacitorPlugin`)
+ * and iOS plugin classes (package `pub.ditto.app`). Renaming it here without
+ * renaming the native classes/package would silently break native
+ * notifications, so it is intentionally left as the original identifier.
+ */
+interface MagikarpNotificationPlugin {
   configure(options: { userPubkey?: string; relayUrls?: string[]; enabledKinds?: number[]; authors?: string[]; notificationStyle?: string }): Promise<void>;
 }
 
-const DittoNotification = registerPlugin<DittoNotificationPlugin>('DittoNotification');
+const MagikarpNotification = registerPlugin<MagikarpNotificationPlugin>('DittoNotification');
 
 /**
  * Manages the native Android notification service via Capacitor.
  *
  * Passes user pubkey + relay URLs + enabled notification kinds + optional
- * authors filter to the DittoNotification plugin so it can poll for events
+ * authors filter to the MagikarpNotification plugin so it can poll for events
  * in the background. Respects the NIP-78 notificationsEnabled setting
  * (defaults to on), per-type notification preferences, and the "only from
  * people I follow" setting.
@@ -73,7 +81,7 @@ export function useNativeNotifications(): void {
     if (!Capacitor.isNativePlatform()) return;
 
     if (!user || !notificationsEnabled) {
-      DittoNotification.configure({});
+      MagikarpNotification.configure({});
       return;
     }
 
@@ -84,7 +92,7 @@ export function useNativeNotifications(): void {
 
     if (relayUrls.length === 0) return;
 
-    DittoNotification.configure({
+    MagikarpNotification.configure({
       userPubkey: user.pubkey,
       relayUrls,
       enabledKinds,

@@ -255,8 +255,8 @@ function FeedTabsSection() {
     return stored ? JSON.parse(stored) : null;
   });
 
-  const [showDittoFeed, setShowDittoFeed] = useState(() => {
-    const stored = localStorage.getItem(getStorageKey(config.appId, 'showDittoFeed'));
+  const [showMagikarpFeed, setShowMagikarpFeed] = useState(() => {
+    const stored = localStorage.getItem(getStorageKey(config.appId, 'showMagikarpFeed'));
     return stored !== null ? stored === 'true' : true; // Default to true
   });
 
@@ -270,9 +270,9 @@ function FeedTabsSection() {
     return stored !== null ? stored === 'true' : false; // Default to false
   });
 
-  const handleToggleDittoFeed = async (checked: boolean) => {
-    setShowDittoFeed(checked);
-    localStorage.setItem(getStorageKey(config.appId, 'showDittoFeed'), String(checked));
+  const handleToggleMagikarpFeed = async (checked: boolean) => {
+    setShowMagikarpFeed(checked);
+    localStorage.setItem(getStorageKey(config.appId, 'showMagikarpFeed'), String(checked));
     toast({
       title: checked ? `${config.appName} feed enabled` : `${config.appName} feed disabled`,
       description: checked
@@ -344,7 +344,7 @@ function FeedTabsSection() {
       const userCount = Object.keys(data.names).length;
 
       // Extract label from domain (hostname without TLD)
-      // ditto.pub -> Ditto, spinster.xyz -> Spinster, etc.
+      // ditto.pub -> Magikarp, spinster.xyz -> Spinster, etc.
       const domainParts = domain.split('.');
       const hostname = domainParts[0]; // Get first part
       const label = hostname.charAt(0).toUpperCase() + hostname.slice(1); // Capitalize
@@ -452,8 +452,8 @@ function FeedTabsSection() {
             <p className="text-xs text-muted-foreground mt-0.5">Show trending and curated content from the {config.appName} relay</p>
           </div>
           <Switch
-            checked={showDittoFeed}
-            onCheckedChange={handleToggleDittoFeed}
+            checked={showMagikarpFeed}
+            onCheckedChange={handleToggleMagikarpFeed}
             className="shrink-0"
           />
         </div>

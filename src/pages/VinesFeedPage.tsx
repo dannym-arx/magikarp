@@ -44,7 +44,7 @@ import { useStreamKind } from "@/hooks/useStreamKind";
 import { type EventStats, useEventStats } from "@/hooks/useTrending";
 import { useUserZap } from "@/hooks/useUserZap";
 import { useUserReaction } from "@/hooks/useUserReaction";
-import { DITTO_RELAY } from "@/lib/appRelays";
+import { MAGIKARP_RELAY } from "@/lib/appRelays";
 import { getAvatarShape } from "@/lib/avatarShape";
 import { getContentWarning } from "@/lib/contentWarning";
 import { EXTRA_KINDS } from "@/lib/extraKinds";
@@ -275,7 +275,7 @@ export function VineRepostButton({
 			queryClient.setQueryData(["user-repost", event.id], "optimistic");
 
 			const tags: string[][] = [
-				["e", event.id, DITTO_RELAY],
+				["e", event.id, MAGIKARP_RELAY],
 				["p", event.pubkey],
 			];
 			if (repostKind === 16) {

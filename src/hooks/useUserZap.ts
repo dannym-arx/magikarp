@@ -5,7 +5,7 @@ import { extractZapSender } from '@/hooks/useEventInteractions';
 
 /**
  * Returns true when the current user has already zapped the given event on
- * either rail -- NIP-57 Lightning (kind 9735) or on-chain Bitcoin (Ditto's
+ * either rail -- NIP-57 Lightning (kind 9735) or on-chain Bitcoin (Magikarp's
  * kind 8333, see `NIP.md`).
  *
  * Used by the action-bar zap button to render a "filled" state after a

@@ -4,7 +4,7 @@ import { useAppContext } from '@/hooks/useAppContext';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { cn } from '@/lib/utils';
 
-interface DittoLogoProps {
+interface MagikarpLogoProps {
   className?: string;
   size?: number;
 }
@@ -109,7 +109,7 @@ function getPixelArtMask(): Promise<string> {
 }
 
 /** The app logo rendered from the custom SVG asset. Occasionally appears pixelated for logged-in users. */
-export function DittoLogo({ className, size = 40 }: DittoLogoProps) {
+export function MagikarpLogo({ className, size = 40 }: MagikarpLogoProps) {
   const { user } = useCurrentUser();
   const { config } = useAppContext();
 
@@ -140,7 +140,7 @@ export function DittoLogo({ className, size = 40 }: DittoLogoProps) {
 }
 
 /** Dynamically generates a pixel-art edge-detected mask from the logo SVG. */
-function PixelatedLogo({ className, size = 40 }: DittoLogoProps) {
+function PixelatedLogo({ className, size = 40 }: MagikarpLogoProps) {
   const ref = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(!!maskCache);
   const { config } = useAppContext();

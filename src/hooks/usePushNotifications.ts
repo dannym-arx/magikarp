@@ -32,8 +32,8 @@ const RPC_RELAYS = [
 ];
 
 // localStorage keys
-const VAPID_KEY_CACHE = 'ditto-push-vapid-key';
-const SUBSCRIPTION_ID_KEY = 'ditto-push-subscription-id';
+const VAPID_KEY_CACHE = 'magikarp-push-vapid-key';
+const SUBSCRIPTION_ID_KEY = 'magikarp-push-subscription-id';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

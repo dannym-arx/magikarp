@@ -44,7 +44,7 @@ import { useProfileUrl } from '@/hooks/useProfileUrl';
 import { useInsertText } from '@/hooks/useInsertText';
 import { useVoiceRecorder } from '@/hooks/useVoiceRecorder';
 import { formatTime } from '@/lib/formatTime';
-import { DITTO_RELAY } from '@/lib/appRelays';
+import { MAGIKARP_RELAY } from '@/lib/appRelays';
 import { resizeImage } from '@/lib/resizeImage';
 import { extractHashtags } from '@/lib/hashtag';
 import { parseAddr } from '@/lib/parseAddr';
@@ -493,10 +493,10 @@ export function ComposeBox({
         kind: quotedEvent.kind,
         pubkey: quotedEvent.pubkey,
         identifier: dTag,
-        relays: [DITTO_RELAY],
+        relays: [MAGIKARP_RELAY],
       });
     }
-    return nip19.neventEncode({ id: quotedEvent.id, author: quotedEvent.pubkey, relays: [DITTO_RELAY] });
+    return nip19.neventEncode({ id: quotedEvent.id, author: quotedEvent.pubkey, relays: [MAGIKARP_RELAY] });
   }, [quotedEvent]);
   const quotedEventKey = quotedEventNip19 ? `nostr:${quotedEventNip19}` : null;
   const showQuotedEvent = quotedEvent && quotedEventKey && !removedEmbeds.has(quotedEventKey);
@@ -766,10 +766,10 @@ export function ComposeBox({
         const voiceTags: string[][] = [imetaTag];
         const rootTag = replyTo.tags.find(([name, , , marker]) => name === 'e' && marker === 'root');
         if (rootTag) {
-          voiceTags.push(['e', rootTag[1], rootTag[2] || DITTO_RELAY, 'root', ...(rootTag[4] ? [rootTag[4]] : [])]);
-          voiceTags.push(['e', replyTo.id, DITTO_RELAY, 'reply', replyTo.pubkey]);
+          voiceTags.push(['e', rootTag[1], rootTag[2] || MAGIKARP_RELAY, 'root', ...(rootTag[4] ? [rootTag[4]] : [])]);
+          voiceTags.push(['e', replyTo.id, MAGIKARP_RELAY, 'reply', replyTo.pubkey]);
         } else {
-          voiceTags.push(['e', replyTo.id, DITTO_RELAY, 'root', replyTo.pubkey]);
+          voiceTags.push(['e', replyTo.id, MAGIKARP_RELAY, 'root', replyTo.pubkey]);
         }
         voiceTags.push(['p', replyTo.pubkey]);
 
@@ -843,11 +843,11 @@ export function ComposeBox({
         const rootTag = replyTo.tags.find(([name, , , marker]) => name === 'e' && marker === 'root');
         if (rootTag) {
           // replyTo is itself a reply – preserve the root and mark replyTo as reply
-          tags.push(['e', rootTag[1], rootTag[2] || DITTO_RELAY, 'root', ...(rootTag[4] ? [rootTag[4]] : [])]);
-          tags.push(['e', replyTo.id, DITTO_RELAY, 'reply', replyTo.pubkey]);
+          tags.push(['e', rootTag[1], rootTag[2] || MAGIKARP_RELAY, 'root', ...(rootTag[4] ? [rootTag[4]] : [])]);
+          tags.push(['e', replyTo.id, MAGIKARP_RELAY, 'reply', replyTo.pubkey]);
         } else {
           // replyTo is a top-level note – it becomes the root
-          tags.push(['e', replyTo.id, DITTO_RELAY, 'root', replyTo.pubkey]);
+          tags.push(['e', replyTo.id, MAGIKARP_RELAY, 'root', replyTo.pubkey]);
         }
 
         // Add p tags: original author + all existing p tags from the parent
@@ -873,9 +873,9 @@ export function ComposeBox({
       if (showQuotedEvent && quotedEvent && quotedEventNip19) {
         if (quotedEvent.kind >= 30000 && quotedEvent.kind < 40000) {
           const dTag = quotedEvent.tags.find(([name]) => name === 'd')?.[1] ?? '';
-          tags.push(['q', `${quotedEvent.kind}:${quotedEvent.pubkey}:${dTag}`, DITTO_RELAY]);
+          tags.push(['q', `${quotedEvent.kind}:${quotedEvent.pubkey}:${dTag}`, MAGIKARP_RELAY]);
         } else {
-          tags.push(['q', quotedEvent.id, DITTO_RELAY, quotedEvent.pubkey]);
+          tags.push(['q', quotedEvent.id, MAGIKARP_RELAY, quotedEvent.pubkey]);
         }
         // Add the nostr: URI to the content if not already present
         const quoteUri = `nostr:${quotedEventNip19}`;

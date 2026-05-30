@@ -18,7 +18,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useNsecPasteGuard } from "@/hooks/useNsecPasteGuard";
 import type { AppConfig } from "@/contexts/AppContext";
 import { NWCProvider } from "@/contexts/NWCContext";
-import { DittoConfigSchema, type DittoConfig } from "@/lib/schemas";
+import { MagikarpConfigSchema, type MagikarpConfig } from "@/lib/schemas";
 import { secureStorage } from "@/lib/secureStorage";
 import { DEFAULT_ESPLORA_APIS } from "@/lib/esplora";
 import { EmotionDevProvider } from "@/blobbi/dev/EmotionDevContext";
@@ -40,8 +40,8 @@ const queryClient = new QueryClient({
 
 /** Hardcoded fallback values. Always provides every required field. */
 const hardcodedConfig: AppConfig = {
-  appName: "Ditto",
-  appId: "ditto",
+  appName: "Magikarp",
+  appId: "magikarp",
   shareOrigin: import.meta.env.VITE_SHARE_ORIGIN || undefined,
   homePage: "feed",
   client: "naddr1qvzqqqru7cpzq7q6z5ns2hm5c8msyv83qwzxpxe52j8c4d4q5m92wsp9sflelkh9qqzkg6t5w3hswjl4yp",
@@ -167,29 +167,29 @@ const hardcodedConfig: AppConfig = {
 };
 
 /**
- * Parse and validate build-time ditto.json overrides from the env string.
+ * Parse and validate build-time magikarp.json overrides from the env string.
  * Returns an empty object when no config file was provided or validation fails.
  */
-function parseDittoConfig(): DittoConfig {
+function parseMagikarpConfig(): MagikarpConfig {
   try {
-    const json = JSON.parse(import.meta.env.DITTO_CONFIG);
+    const json = JSON.parse(import.meta.env.MAGIKARP_CONFIG);
     if (!json) return {};
-    return DittoConfigSchema.parse(json);
+    return MagikarpConfigSchema.parse(json);
   } catch {
     return {};
   }
 }
 
 /**
- * Merge hardcoded defaults with build-time ditto.json overrides.
+ * Merge hardcoded defaults with build-time magikarp.json overrides.
  * Deep-merges feedSettings so a partial override doesn't erase defaults.
  * Precedence (handled by AppProvider): user localStorage > build-time > hardcoded.
  */
-const dittoConfig = parseDittoConfig();
+const magikarpConfig = parseMagikarpConfig();
 const defaultConfig: AppConfig = {
   ...hardcodedConfig,
-  ...dittoConfig,
-  feedSettings: { ...hardcodedConfig.feedSettings, ...dittoConfig.feedSettings },
+  ...magikarpConfig,
+  feedSettings: { ...hardcodedConfig.feedSettings, ...magikarpConfig.feedSettings },
 };
 
 export function App() {

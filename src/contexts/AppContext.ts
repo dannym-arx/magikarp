@@ -212,14 +212,14 @@ export interface SavedFeed {
 }
 
 export interface AppConfig {
-  /** Application display name used in page titles, UI text, and branding. Default: "Ditto". */
+  /** Application display name used in page titles, UI text, and branding. Default: "Magikarp". */
   appName: string;
-  /** Application identifier used as a prefix for application-specific metadata (NIP-78 d-tags, etc). Default: "ditto". */
+  /** Application identifier used as a prefix for application-specific metadata (NIP-78 d-tags, etc). Default: "magikarp". */
   appId: string;
   /**
    * Canonical origin used when generating shareable URLs (QR codes, copy-link,
    * remote-login callbacks, etc). Falls back to `window.location.origin` when
-   * unset. Configure this in `ditto.json` for native builds, where
+   * unset. Configure this in `magikarp.json` for native builds, where
    * `window.location.origin` is `capacitor://localhost` or `https://localhost`.
    * Must NOT include a trailing slash.
    */
@@ -290,7 +290,7 @@ export interface AppConfig {
   autoplayVideos: boolean;
   /** Image upload quality: "compressed" resizes/optimizes, "original" uploads as-is. Default: "compressed". */
   imageQuality: 'compressed' | 'original';
-  /** Hex pubkey of the curator whose follow list defines the Ditto feed. */
+  /** Hex pubkey of the curator whose follow list defines the Magikarp feed. */
   curatorPubkey?: string;
   /** Wildcard domain used for iframe sandboxing (e.g. "iframe.diy"). Default: "iframe.diy". */
   sandboxDomain: string;

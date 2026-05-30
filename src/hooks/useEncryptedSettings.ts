@@ -26,7 +26,7 @@ let lastWriteTs: number = 0;
  */
 export function getLocalSettingsSync(pubkey: string): number {
   try {
-    return Number(localStorage.getItem(`ditto:settings-lastSync:${pubkey}`)) || 0;
+    return Number(localStorage.getItem(`magikarp:settings-lastSync:${pubkey}`)) || 0;
   } catch {
     return 0;
   }
@@ -34,7 +34,7 @@ export function getLocalSettingsSync(pubkey: string): number {
 
 export function setLocalSettingsSync(pubkey: string, lastSync: number): void {
   try {
-    localStorage.setItem(`ditto:settings-lastSync:${pubkey}`, String(lastSync));
+    localStorage.setItem(`magikarp:settings-lastSync:${pubkey}`, String(lastSync));
   } catch {
     // localStorage may not be available
   }

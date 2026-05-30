@@ -108,7 +108,7 @@ function hasBip375SpOutputs(psbtHex: string): boolean {
  * Resolve BIP-375 silent payment outputs in a PSBT v2 to concrete P2TR
  * outputs, build a finalized PSBT v2 (script written in, signatures
  * present), and return its hex. Assumes every input is the sender's own
- * P2TR — which is the only shape Ditto's wallet produces.
+ * P2TR — which is the only shape Magikarp's wallet produces.
  */
 function signBip375PsbtV2Locally(
   psbtHex: string,

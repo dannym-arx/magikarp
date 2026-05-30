@@ -522,7 +522,7 @@ export const EXTRA_KINDS: ExtraKindDef[] = [
   // Fundraisers — kind 33863 (addressable). Feed-only: opening a
   // campaign's naddr lands on PostDetailPage, which knows how to render
   // kind 33863 via CampaignContent. We don't host campaign creation or
-  // donation flows in Ditto — those belong to Agora — but we surface
+  // donation flows in Magikarp — those belong to Agora — but we surface
   // campaigns in feeds and threads.
   {
     kind: 33863,
@@ -536,7 +536,7 @@ export const EXTRA_KINDS: ExtraKindDef[] = [
     blurb: 'Fundraisers from across Nostr. Authored on Agora; readable from anywhere. Each campaign is self-hosted by its creator, with a Bitcoin wallet endpoint for donations.',
     sites: [{ url: 'https://agora.spot', name: 'Agora' }],
   },
-  // Birdstar (feed-only — external app, no Ditto page)
+  // Birdstar (feed-only — external app, no Magikarp page)
   {
     kind: 2473,
     id: 'bird-detections',

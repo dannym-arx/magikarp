@@ -12,8 +12,10 @@ import { SendBitcoinDialog } from '@/components/SendBitcoinDialog';
 import { useAppContext } from '@/hooks/useAppContext';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useBitcoinWallet } from '@/hooks/useBitcoinWallet';
+import { useShitcoinAddresses } from '@/hooks/useShitcoinAddresses';
 import { satsToUSD, formatBTC } from '@/lib/bitcoin';
 import type { Transaction } from '@/lib/bitcoin';
+import type { ShitcoinWallet } from '@/lib/shitcoins';
 
 /**
  * Shape of `location.state` consumed by this page when arriving via a
@@ -30,6 +32,7 @@ export function WalletPage() {
   const { config } = useAppContext();
   const { user } = useCurrentUser();
   const { bitcoinAddress, addressData, btcPrice, transactions, isLoading, error, refetch } = useBitcoinWallet();
+  const { wallets: shitcoinWallets } = useShitcoinAddresses();
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -37,6 +40,7 @@ export function WalletPage() {
 
   const [copiedAddress, setCopiedAddress] = useState(false);
   const [txOpen, setTxOpen] = useState(false);
+  const [shitcoinsOpen, setShitcoinsOpen] = useState(false);
   const [sendOpen, setSendOpen] = useState(false);
   // Snapshot of the URI we opened with. We snapshot once (rather than reading
   // `locationState?.bip21Uri` on every render) so clearing `location.state`
@@ -199,9 +203,72 @@ export function WalletPage() {
               </TxAccordion>
             </>
           )}
+
+          {/* Shitcoins — every npub is also a wallet on five other chains */}
+          {shitcoinWallets.length > 0 && (
+            <div className="w-full pt-2">
+              <button
+                onClick={() => setShitcoinsOpen((o) => !o)}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors cursor-pointer mx-auto"
+              >
+                Shitcoins
+                <ChevronDown className={`size-3 transition-transform duration-200 ${shitcoinsOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <TxAccordion open={shitcoinsOpen}>
+                <div className="w-full pt-3 space-y-2">
+                  <p className="text-[11px] leading-relaxed text-muted-foreground text-center px-2">
+                    Your Nostr key is also a wallet on these chains. Derived from your npub —
+                    no extra setup, no network calls.
+                  </p>
+                  <div className="w-full divide-y">
+                    {shitcoinWallets.map((w) => (
+                      <ShitcoinRow key={w.id} wallet={w} />
+                    ))}
+                  </div>
+                </div>
+              </TxAccordion>
+            </div>
+          )}
         </div>
       )}
     </main>
+  );
+}
+
+/** A single derived shitcoin address row with copy-to-clipboard. */
+function ShitcoinRow({ wallet }: { wallet: ShitcoinWallet }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(wallet.address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API not available
+    }
+  };
+
+  const truncated = wallet.address.length > 24
+    ? `${wallet.address.slice(0, 10)}...${wallet.address.slice(-6)}`
+    : wallet.address;
+
+  return (
+    <button
+      onClick={copy}
+      className="w-full flex items-center justify-between gap-3 py-3 px-2 -mx-1 hover:bg-muted/50 transition-colors rounded-lg cursor-pointer text-left"
+    >
+      <div className="min-w-0">
+        <p className="text-sm font-medium">{wallet.name}</p>
+        <p className="text-xs font-mono text-muted-foreground truncate">{truncated}</p>
+      </div>
+      {copied ? (
+        <Check className="size-3.5 shrink-0 text-green-500" />
+      ) : (
+        <Copy className="size-3.5 shrink-0 text-muted-foreground" />
+      )}
+    </button>
   );
 }
 

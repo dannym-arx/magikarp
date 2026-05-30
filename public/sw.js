@@ -1,5 +1,5 @@
 /**
- * Ditto Service Worker
+ * Magikarp Service Worker
  *
  * Handles incoming Web Push notifications from the nostr-push server and
  * opens/focuses the app when the user taps a notification.
@@ -14,17 +14,17 @@ self.addEventListener('push', (event) => {
   try {
     payload = event.data.json();
   } catch {
-    payload = { title: 'Ditto', body: event.data.text() };
+    payload = { title: 'Magikarp', body: event.data.text() };
   }
 
-  const title = payload.title ?? 'Ditto';
+  const title = payload.title ?? 'Magikarp';
   const options = {
     body: payload.body ?? '',
     icon: payload.icon ?? '/icon-192.png',
     badge: payload.badge ?? '/icon-192.png',
     data: payload.data ?? {},
     requireInteraction: false,
-    tag: payload.data?.subscription_id ?? 'ditto-notification',
+    tag: payload.data?.subscription_id ?? 'magikarp-notification',
     renotify: true,
   };
 
@@ -42,7 +42,7 @@ self.addEventListener('notificationclick', (event) => {
     self.clients
       .matchAll({ type: 'window', includeUncontrolled: true })
       .then((clientList) => {
-        // Focus an existing Ditto tab if one is open
+        // Focus an existing Magikarp tab if one is open
         for (const client of clientList) {
           if (new URL(client.url).origin === self.location.origin) {
             client.navigate('/notifications');

@@ -7,7 +7,7 @@
  *
  * Sources:
  * - NIP README kinds table (https://github.com/nostr-protocol/nips)
- * - Ditto reference (https://about.ditto.pub/reference)
+ * - Magikarp reference (https://about.ditto.pub/reference)
  * - Existing codebase registries (consolidated)
  *
  * Labels are bare noun phrases (no articles, no verbs) so each consumer can
@@ -122,13 +122,13 @@ export const KIND_LABELS: Record<number, string> = {
   // Coinjoin
   2022: 'Coinjoin pool',
 
-  // Ditto custom kinds
+  // Magikarp custom kinds
   2473: 'Bird detection',
 
   // NIP-82 (Zapstore)
   3063: 'Zapstore asset',
 
-  // Ditto custom kinds
+  // Magikarp custom kinds
   3367: 'Color moment',
 
   // NIP-72
@@ -152,7 +152,7 @@ export const KIND_LABELS: Record<number, string> = {
   8000: 'Add user',
   8001: 'Remove user',
 
-  // Ditto letters
+  // Magikarp letters
   8211: 'Letter',
 
   // NIP-29 Group control (range)
@@ -226,7 +226,7 @@ export const KIND_LABELS: Record<number, string> = {
   // Blobbi
   11125: 'Blobbonaut profile',
 
-  // Ditto custom kinds
+  // Magikarp custom kinds
   12473: 'Birdex',
 
   // NIP-47 Wallet
@@ -331,7 +331,7 @@ export const KIND_LABELS: Record<number, string> = {
   // NIP-34 Git
   30617: 'Repository',
   30618: 'Repository state',
-  // Ditto custom kinds
+  // Magikarp custom kinds
   30621: 'Constellation',
   // NIP-54 Wiki
   30818: 'Wiki article',
@@ -379,7 +379,7 @@ export const KIND_LABELS: Record<number, string> = {
   36767: 'Theme definition',
   // Music
   36787: 'Music track',
-  // Ditto custom
+  // Magikarp custom
   37381: 'Magic deck',
   37516: 'Geocache listing',
   // NIP-87

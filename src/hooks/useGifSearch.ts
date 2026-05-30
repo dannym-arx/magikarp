@@ -67,7 +67,7 @@ async function fetchTenorSearch(query: string, pos?: string): Promise<{ results:
     limit: String(RESULTS_LIMIT),
     media_filter: 'gif,tinygif',
     contentfilter: 'medium',
-    client_key: 'ditto_nostr',
+    client_key: 'magikarp_nostr',
   });
   if (pos) params.set('pos', pos);
 
@@ -87,7 +87,7 @@ async function fetchTenorTrending(pos?: string): Promise<{ results: GifResult[];
     limit: String(RESULTS_LIMIT),
     media_filter: 'gif,tinygif',
     contentfilter: 'medium',
-    client_key: 'ditto_nostr',
+    client_key: 'magikarp_nostr',
   });
   if (pos) params.set('pos', pos);
 

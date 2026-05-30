@@ -2,12 +2,12 @@ import { useNostr } from '@nostrify/react';
 import { useQuery } from '@tanstack/react-query';
 import type { NostrEvent } from '@nostrify/nostrify';
 import { parseMusicPlaylist } from '@/lib/musicHelpers';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 
 interface UseMusicPlaylistsOptions {
   /** Filter playlists to only these author pubkeys. */
   authors?: string[];
-  /** NIP-50 search string (e.g. `"sort:hot"`). When set, queries the Ditto relay. */
+  /** NIP-50 search string (e.g. `"sort:hot"`). When set, queries the Magikarp relay. */
   search?: string;
   /** Maximum playlists to fetch (default: 50). */
   limit?: number;
@@ -19,7 +19,7 @@ interface UseMusicPlaylistsOptions {
  * Fetches kind 34139 music playlist events.
  *
  * When `authors` is provided, only playlists by those pubkeys are returned.
- * When `search` is provided, queries the Ditto relay with NIP-50 extensions
+ * When `search` is provided, queries the Magikarp relay with NIP-50 extensions
  * (e.g. `sort:hot` for engagement-weighted ordering).
  * Returns only events that successfully parse via `parseMusicPlaylist()`.
  */
@@ -40,8 +40,8 @@ export function useMusicPlaylists(options: UseMusicPlaylistsOptions = {}) {
         filter.search = search;
       }
 
-      // Use Ditto relay for NIP-50 search queries, default pool otherwise
-      const target = search ? nostr.group(DITTO_RELAYS) : nostr;
+      // Use Magikarp relay for NIP-50 search queries, default pool otherwise
+      const target = search ? nostr.group(MAGIKARP_RELAYS) : nostr;
 
       const events = await target.query(
         [filter as { kinds: number[]; limit: number; authors?: string[]; search?: string }],

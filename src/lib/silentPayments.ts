@@ -44,7 +44,7 @@ import { sha256 } from '@noble/hashes/sha256';
  *
  * `@noble/curves` v1 exposes the projective-point constructor as
  * `secp256k1.ProjectivePoint`; v2 moved it to `schnorr.Point`. We use the
- * v1 export to match the rest of the ditto codebase.
+ * v1 export to match the rest of the magikarp codebase.
  */
 const Point = secp256k1.ProjectivePoint;
 

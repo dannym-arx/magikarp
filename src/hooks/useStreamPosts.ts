@@ -8,7 +8,7 @@ import { isRepostKind } from '@/lib/feedUtils';
 import { isReplyEvent } from '@/lib/nostrEvents';
 import { isEventMuted } from '@/lib/muteHelpers';
 import type { NostrEvent, NostrFilter } from '@nostrify/nostrify';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 import { nip19 } from 'nostr-tools';
 import { isNostrId } from '@/lib/nostrId';
 
@@ -260,12 +260,12 @@ export function useStreamPosts(query: string, options: StreamPostsOptions) {
       searchParts.push(query.trim());
     }
 
-    // Add language filter (NIP-50 extension supported by Ditto)
+    // Add language filter (NIP-50 extension supported by Magikarp)
     if (options.language && options.language !== 'global') {
       searchParts.push(`language:${options.language}`);
     }
 
-    // Add media filter (NIP-50 extension supported by Ditto)
+    // Add media filter (NIP-50 extension supported by Magikarp)
     // Skip for dedicated-kind queries — kind selection already scopes them
     if (!isDedicatedKindQuery) {
       if (options.mediaType === 'images') {
@@ -409,10 +409,10 @@ export function useStreamPosts(query: string, options: StreamPostsOptions) {
       try {
         const now = Math.floor(Date.now() / 1000);
         
-        // Use Ditto relays directly for streaming to avoid pool's eoseTimeout
-        const dittoRelay = nostr.group(DITTO_RELAYS);
+        // Use Magikarp relays directly for streaming to avoid pool's eoseTimeout
+        const magikarpRelay = nostr.group(MAGIKARP_RELAYS);
         
-        for await (const msg of dittoRelay.req(
+        for await (const msg of magikarpRelay.req(
           [{ ...streamFilter, since: now, limit: 0 }],
           { signal: ac.signal }
         )) {

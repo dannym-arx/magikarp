@@ -2,7 +2,7 @@ import { useNostr } from '@nostrify/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import type { NostrFilter } from '@nostrify/nostrify';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 import { useFollowList } from '@/hooks/useFollowActions';
 import { useMutedAuthorFilter } from '@/hooks/useMutedAuthorFilter';
 import type { MusicSort, MusicScope } from '@/components/music/MusicSortFilterBar';
@@ -25,12 +25,12 @@ interface UseMusicFeedOptions {
 /**
  * Infinite-scroll music feed with sort and scope filtering.
  *
- * - **Sort**: Maps to Ditto NIP-50 search extensions (`sort:hot`, `sort:top`,
+ * - **Sort**: Maps to Magikarp NIP-50 search extensions (`sort:hot`, `sort:top`,
  *   or chronological for `new`).
  * - **Scope**: `global` queries all authors; `following` restricts to the
  *   current user's kind 3 follow list (minus any muted pubkeys).
  *
- * Hot and Top sorts query the Ditto relay (NIP-50 required).
+ * Hot and Top sorts query the Magikarp relay (NIP-50 required).
  * New sort queries the default relay pool (standard chronological).
  *
  * Pagination uses `until`-based cursor on `created_at`.
@@ -86,8 +86,8 @@ export function useMusicFeed({ kind, sort, scope, genre, enabled = true }: UseMu
         filter.search = 'sort:top';
       }
 
-      // Hot/top need the Ditto relay for NIP-50; new uses default pool
-      const target = sort === 'new' ? nostr : nostr.group(DITTO_RELAYS);
+      // Hot/top need the Magikarp relay for NIP-50; new uses default pool
+      const target = sort === 'new' ? nostr : nostr.group(MAGIKARP_RELAYS);
       const timeout = AbortSignal.any([signal, AbortSignal.timeout(10000)]);
 
       const events = await target.query([filter], { signal: timeout });

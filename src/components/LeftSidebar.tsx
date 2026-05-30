@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { getAvatarShape } from '@/lib/avatarShape';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { DittoLogo } from '@/components/DittoLogo';
+import { MagikarpLogo } from '@/components/MagikarpLogo';
 import { EmojifiedText } from '@/components/CustomEmoji';
 import { ProfileSearchDropdown } from '@/components/ProfileSearchDropdown';
 import { SidebarNavList } from '@/components/SidebarNavItem';
@@ -89,7 +89,7 @@ export function LeftSidebar() {
       <div className="flex items-center px-3 mb-1">
         <Link to="/" onClick={scrollToTopIfCurrent('/')}>
           <div className="bg-background/85 rounded-full">
-            <DittoLogo size={48} />
+            <MagikarpLogo size={48} />
           </div>
         </Link>
       </div>

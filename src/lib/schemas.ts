@@ -272,19 +272,19 @@ export const AppConfigSchema = z.object({
   })).optional(),
 });
 
-// ─── DittoConfigSchema (build-time ditto.json) ───────────────────────
+// ─── MagikarpConfigSchema (build-time magikarp.json) ───────────────────────
 
 /**
- * Schema for the build-time `ditto.json` configuration file.
+ * Schema for the build-time `magikarp.json` configuration file.
  * Derived from AppConfigSchema with all fields made optional and strict
  * mode enabled so unknown keys are rejected.
  */
-export const DittoConfigSchema = AppConfigSchema
+export const MagikarpConfigSchema = AppConfigSchema
   .partial()
   .strict();
 
 /** Inferred type for the build-time configuration. */
-export type DittoConfig = z.infer<typeof DittoConfigSchema>;
+export type MagikarpConfig = z.infer<typeof MagikarpConfigSchema>;
 
 // ─── Content Filter Schemas ──────────────────────────────────────────
 

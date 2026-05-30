@@ -22,8 +22,8 @@ export function TestApp({ children }: TestAppProps) {
   });
 
   const defaultConfig: AppConfig = {
-    appName: "Ditto",
-    appId: "ditto",
+    appName: "Magikarp",
+    appId: "magikarp",
     homePage: "feed",
     theme: "light",
     autoShareTheme: true,

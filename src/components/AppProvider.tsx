@@ -217,7 +217,7 @@ function useApplyBackground(theme: Theme, customTheme: ThemeConfig | undefined, 
 
 /**
  * Hook to dynamically recolor the favicon to match the current primary color.
- * Uses the same mask approach as DittoLogo: loads the SVG, draws it as a mask
+ * Uses the same mask approach as MagikarpLogo: loads the SVG, draws it as a mask
  * on a canvas filled with the primary color, and sets the result as the favicon.
  */
 function useApplyFavicon(theme: Theme, customTheme: ThemeConfig | undefined, themes: ThemesConfig | undefined) {

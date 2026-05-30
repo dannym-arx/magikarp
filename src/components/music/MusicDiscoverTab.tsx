@@ -5,7 +5,7 @@ import { useNostr } from '@nostrify/react';
 import { useQuery } from '@tanstack/react-query';
 import { parseMusicTrack } from '@/lib/musicHelpers';
 import { getExtraKindDef } from '@/lib/extraKinds';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 import { useCuratedMusicArtists } from '@/hooks/useCuratedMusicArtists';
 import { useFeaturedMusicTracks } from '@/hooks/useFeaturedMusicTracks';
 import { useMusicCuratorFollows } from '@/hooks/useMusicCuratorFollows';
@@ -83,7 +83,7 @@ export function MusicDiscoverTab({ onSwitchToTracks, onSwitchToPlaylists, onSwit
     isLoading: isTracksLoading,
   } = useMusicData({ authors: curatedPubkeys });
 
-  // New Tracks: sorted query for hot/top via Ditto relay, or chronological for new
+  // New Tracks: sorted query for hot/top via Magikarp relay, or chronological for new
   const { data: sortedNewTracks, isLoading: isSortedLoading, isError: isSortedError } = useQuery<NostrEvent[]>({
     queryKey: ['discover-new-tracks', newTracksSort, newTracksScope, newTracksAuthors?.slice().sort().join(',') ?? '', selectedGenre ?? ''],
     queryFn: async ({ signal }) => {
@@ -108,8 +108,8 @@ export function MusicDiscoverTab({ onSwitchToTracks, onSwitchToPlaylists, onSwit
         );
       } else {
         filter.search = `sort:${newTracksSort}`;
-        const ditto = nostr.group(DITTO_RELAYS);
-        events = await ditto.query(
+        const magikarp = nostr.group(MAGIKARP_RELAYS);
+        events = await magikarp.query(
           [filter as { kinds: number[]; authors: string[]; search: string; limit: number; '#t'?: string[] }],
           { signal: timeout },
         );

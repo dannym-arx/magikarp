@@ -8,19 +8,19 @@ import react from "@vitejs/plugin-react";
 import { visualizer } from "rollup-plugin-visualizer";
 import { defineConfig, loadEnv, type Plugin } from "vite";
 
-import { DittoConfigSchema } from "./src/lib/schemas";
+import { MagikarpConfigSchema } from "./src/lib/schemas";
 
 /**
- * Load and validate the build-time ditto.json configuration file.
+ * Load and validate the build-time magikarp.json configuration file.
  * Returns the parsed config object, or `undefined` if the file doesn't exist.
- * Set the DITTO_CONFIG_FILE env var to override the default path ("./ditto.json").
+ * Set the MAGIKARP_CONFIG_FILE env var to override the default path ("./magikarp.json").
  *
- * Why DITTO_CONFIG_FILE and not CONFIG_FILE: GitLab Runner sets CONFIG_FILE in
+ * Why MAGIKARP_CONFIG_FILE and not CONFIG_FILE: GitLab Runner sets CONFIG_FILE in
  * its job environment to point at its own TOML config (~/.gitlab-runner/config.toml),
  * so a generic name silently breaks every CI build that runs on a self-hosted runner.
  */
-function loadDittoConfig(): object | undefined {
-  const configPath = path.resolve(process.env.DITTO_CONFIG_FILE ?? "./ditto.json");
+function loadMagikarpConfig(): object | undefined {
+  const configPath = path.resolve(process.env.MAGIKARP_CONFIG_FILE ?? "./magikarp.json");
 
   let raw: string;
   try {
@@ -31,7 +31,7 @@ function loadDittoConfig(): object | undefined {
   }
 
   const json = JSON.parse(raw);
-  const result = DittoConfigSchema.parse(json);
+  const result = MagikarpConfigSchema.parse(json);
   return result;
 }
 
@@ -65,7 +65,7 @@ function mergePublicDir(externalDir: string): Plugin {
   const resolved = path.resolve(externalDir);
 
   return {
-    name: "ditto:merge-public-dir",
+    name: "magikarp:merge-public-dir",
 
     configureServer(server) {
       // Serve files from the external public dir before the default public dir.
@@ -98,7 +98,7 @@ function mergePublicDir(externalDir: string): Plugin {
   };
 }
 
-const dittoConfig = loadDittoConfig();
+const magikarpConfig = loadMagikarpConfig();
 const publicDir = process.env.PUBLIC_DIR;
 const require = createRequire(import.meta.url);
 const pkg = require("./package.json") as { version: string };
@@ -143,7 +143,7 @@ export default defineConfig(({ mode }) => {
     ...(publicDir ? [mergePublicDir(publicDir)] : []),
   ],
   define: {
-    'import.meta.env.DITTO_CONFIG': JSON.stringify(JSON.stringify(dittoConfig ?? null)),
+    'import.meta.env.MAGIKARP_CONFIG': JSON.stringify(JSON.stringify(magikarpConfig ?? null)),
     'import.meta.env.VERSION': JSON.stringify(pkg.version),
     'import.meta.env.BUILD_DATE': JSON.stringify(new Date().toISOString()),
     'import.meta.env.COMMIT_SHA': JSON.stringify(getCommitSha()),

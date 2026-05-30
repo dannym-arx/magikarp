@@ -2,10 +2,10 @@
  * SendAnimation
  *
  * Full-screen overlay: letter slides into envelope, flap closes, wax seal
- * stamps with the Ditto logo, floats away, then shows "Sent a letter to <name>!"
+ * stamps with the Magikarp logo, floats away, then shows "Sent a letter to <name>!"
  *
  * Envelope colors are derived from the letter's stationery (theme colors).
- * The wax seal uses the stationery's primary color and the Ditto logo.
+ * The wax seal uses the stationery's primary color and the Magikarp logo.
  */
 
 import { useId, useRef, useEffect, useLayoutEffect, useCallback, useState, useMemo } from 'react';
@@ -401,7 +401,7 @@ export function SendAnimation({
                     }}
                   />
 
-                  {/* Ditto logo */}
+                  {/* Magikarp logo */}
                   <div
                     className="absolute inset-0 flex items-center justify-center"
                     style={{ zIndex: 1 }}

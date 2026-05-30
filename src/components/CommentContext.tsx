@@ -276,7 +276,7 @@ const KIND_SUFFIXES: Partial<Record<number, string>> = {
   34139: 'playlist',
 };
 
-/** Postfix that replaces the default pattern (e.g. "Ditto on Zapstore" instead of "Ditto Zapstore app"). */
+/** Postfix that replaces the default pattern (e.g. "Magikarp on Zapstore" instead of "Magikarp Zapstore app"). */
 const KIND_POSTFIXES: Partial<Record<number, string>> = {
   32267: 'on Zapstore',
   30063: 'Zapstore release',
@@ -312,7 +312,7 @@ function getEventDisplayName(event: NostrEvent): { text: string; icon?: React.Co
   const alt = event.tags.find(([name]) => name === 'alt')?.[1]?.trim();
   const displayTitle = title || name || dTag;
 
-  // Kinds with a custom postfix (e.g. "Ditto on Zapstore")
+  // Kinds with a custom postfix (e.g. "Magikarp on Zapstore")
   const postfix = KIND_POSTFIXES[event.kind];
   if (postfix && displayTitle) {
     return { text: `${displayTitle} ${postfix}`, icon };

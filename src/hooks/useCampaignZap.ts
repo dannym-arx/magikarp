@@ -58,7 +58,7 @@ interface CampaignZapResult {
 }
 
 /**
- * Send a Bitcoin donation to a kind 33863 Fundraiser/Campaign from Ditto's
+ * Send a Bitcoin donation to a kind 33863 Fundraiser/Campaign from Magikarp's
  * built-in PSBT-capable wallet.
  *
  * Pass `null` when the caller doesn't currently have a campaign in hand —
@@ -111,7 +111,7 @@ export function useCampaignZap(
       if (!user) throw new Error('You must be logged in to donate.');
       if (!canSignPsbt || !signPsbt) {
         throw new Error(
-          "Your login doesn't support sending Bitcoin. Log in with your secret key to donate from Ditto.",
+          "Your login doesn't support sending Bitcoin. Log in with your secret key to donate from Magikarp.",
         );
       }
       if (!Number.isFinite(amountSats) || amountSats <= 0) {

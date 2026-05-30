@@ -2,7 +2,7 @@ import { useNostr } from '@nostrify/react';
 import { useQuery } from '@tanstack/react-query';
 import type { NostrEvent } from '@nostrify/nostrify';
 import { parseMusicTrack } from '@/lib/musicHelpers';
-import { DITTO_RELAYS } from '@/lib/appRelays';
+import { MAGIKARP_RELAYS } from '@/lib/appRelays';
 
 /** Minimum number of featured tracks before we backfill with recent tracks. */
 const MIN_FEATURED = 5;
@@ -10,7 +10,7 @@ const MIN_FEATURED = 5;
 /**
  * Fetches hot music tracks from curated artists, deduplicated by author.
  *
- * Uses the Ditto relay's NIP-50 search extensions:
+ * Uses the Magikarp relay's NIP-50 search extensions:
  * - `sort:hot` — engagement weighted with time decay (surfaces what's trending now)
  * - `distinct:author` — one result per author (ensures artist variety)
  *
@@ -34,10 +34,10 @@ export function useFeaturedMusicTracks(curatedPubkeys: string[] | undefined) {
       if (!curatedPubkeys || curatedPubkeys.length === 0) return [];
 
       const timeout = AbortSignal.any([signal, AbortSignal.timeout(10000)]);
-      const ditto = nostr.group(DITTO_RELAYS);
+      const magikarp = nostr.group(MAGIKARP_RELAYS);
 
       // Primary query: hot tracks, one per artist
-      const hotEvents = await ditto.query(
+      const hotEvents = await magikarp.query(
         [{
           kinds: [36787],
           authors: curatedPubkeys,
@@ -53,7 +53,7 @@ export function useFeaturedMusicTracks(curatedPubkeys: string[] | undefined) {
       if (results.length < MIN_FEATURED) {
         const seenAuthors = new Set(results.map((ev) => ev.pubkey));
 
-        const recentEvents = await ditto.query(
+        const recentEvents = await magikarp.query(
           [{
             kinds: [36787],
             authors: curatedPubkeys,

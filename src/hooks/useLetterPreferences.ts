@@ -14,7 +14,7 @@ export function useLetterPreferences() {
   // Raw saved prefs — stationery may be undefined if never set
   const prefs: LetterPreferences = settings?.letterPreferences ?? {};
 
-  /** True when no stationery has been explicitly saved — use the active Ditto theme. */
+  /** True when no stationery has been explicitly saved — use the active Magikarp theme. */
   const isThemeDefault = !prefs.stationery;
 
   const updatePrefs = useCallback(
@@ -25,7 +25,7 @@ export function useLetterPreferences() {
     [settings, updateSettings],
   );
 
-  /** Remove the saved stationery, reverting to the active Ditto theme. */
+  /** Remove the saved stationery, reverting to the active Magikarp theme. */
   const resetStationery = useCallback(() => {
     const current: LetterPreferences = settings?.letterPreferences ?? {};
     const { stationery: _removed, ...rest } = current;
