@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useSeoMeta } from '@unhead/react';
-import { Bitcoin, Copy, Check, RefreshCw, Wallet, ChevronDown, ArrowDownLeft, ArrowUpRight, Send, Rocket, ExternalLink } from 'lucide-react';
+import { Bitcoin, Copy, Check, RefreshCw, Wallet, ChevronDown, ArrowDownLeft, ArrowUpRight, Send, Rocket, ExternalLink, AlertTriangle } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -296,9 +296,230 @@ export function WalletPage() {
               </div>
             );
           })()}
+
+          <WhyThisIsTerrible />
         </div>
       )}
     </main>
+  );
+}
+
+/**
+ * The serious counterweight to everything above. The cross-chain section is a
+ * joke about the absurdity of mapping one public key to eight chains; this
+ * block is the explanation of *why* it's a joke — and why on-chain zaps, the
+ * whole reason this scheme is technically possible, are an awful idea in
+ * practice. Always visible. Destructive-themed so it visually breaks from
+ * the rest of the page and cannot be confused for more bit.
+ */
+function WhyThisIsTerrible() {
+  return (
+    <section className="w-full pt-10 mt-6 border-t border-destructive/30 space-y-6">
+      <header className="text-center space-y-2">
+        <div className="inline-flex items-center gap-2 rounded-full border border-destructive/50 bg-destructive/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-destructive">
+          <AlertTriangle className="size-3.5" />
+          Stop. Read this first.
+        </div>
+        <h2 className="text-lg font-bold">
+          Why this entire page is a terrible idea
+        </h2>
+        <p className="text-xs text-muted-foreground italic max-w-sm mx-auto">
+          The memes above are a joke. The warning below is not. If you take one
+          thing from this wallet, take this section.
+        </p>
+      </header>
+
+      <div className="space-y-7 text-sm leading-relaxed">
+        {/* ── Section 1: Why this is a terrible idea ─────────────────── */}
+        <article className="space-y-3">
+          <h3 className="text-sm font-bold flex items-center gap-2">
+            <span className="text-destructive">1.</span>
+            Why deriving a wallet from your npub is a terrible idea
+          </h3>
+          <p className="text-muted-foreground">
+            Every Nostr keypair maps to exactly one Bitcoin Taproot address —
+            and, on this page, to seven other chains. That sounds convenient.
+            It is, in fact, one of the worst design choices you can make for
+            financial privacy and operational security.
+          </p>
+          <p className="text-muted-foreground">
+            Your npub is public. It is on every relay, in every profile
+            lookup, in every reply you have ever made. Once anyone derives
+            your address from your npub (which any client can do in
+            milliseconds), your entire on-chain history is permanently and
+            publicly attached to your social identity. Forever. The
+            blockchain doesn't forget. There is no "deactivate account."
+          </p>
+          <p className="text-muted-foreground">
+            Worse: this isn't one address per receive — it is{' '}
+            <em>the</em> address, reused for every payment that ever lands.
+            Address reuse is the cardinal sin of Bitcoin privacy. It
+            collapses what should be a forest of disconnected UTXOs into a
+            single, perfectly clustered, perfectly identified wallet. Chain
+            analysis firms charge enterprise rates to do this clustering
+            inference. This scheme just hands them the answer key.
+          </p>
+          <p className="text-muted-foreground">
+            And the same key signs your Nostr posts <em>and</em> spends your
+            Bitcoin. There is no recovery, no rotation, no separation of
+            concerns. A single compromise — a leaked nsec, a malicious
+            extension, a keylogger — loses your social identity and your
+            funds on eight chains simultaneously, in one event, with no
+            undo.
+          </p>
+        </article>
+
+        {/* ── Section 2: Why privacy matters ──────────────────────────── */}
+        <article className="space-y-3">
+          <h3 className="text-sm font-bold flex items-center gap-2">
+            <span className="text-destructive">2.</span>
+            Why privacy matters
+          </h3>
+          <p className="text-muted-foreground">
+            Financial privacy isn't about hiding wrongdoing. It is about not
+            handing every present and future adversary a complete dossier of
+            your economic life. Specifically:
+          </p>
+          <ul className="space-y-1.5 text-muted-foreground list-disc pl-5">
+            <li>Your employer cannot see which causes, churches, unions, or political campaigns you donate to.</li>
+            <li>Your government cannot see how much you hold when it decides whom to audit, freeze, sanction, or detain.</li>
+            <li>Your ex cannot see who pays you, or what for.</li>
+            <li>A stalker cannot watch your money move — and, through exchange withdrawals, infer where you physically are.</li>
+            <li>Strangers cannot compute your net worth from a profile click.</li>
+            <li>You don't paint a target on your back for kidnappers. The "$5 wrench attack" on visibly wealthy crypto holders is real, rising, and lethal.</li>
+            <li>Every counterparty you have ever transacted with does not become a publicly discoverable associate of yours.</li>
+            <li>You do not surrender every future version of yourself to a permanent, immutable, world-readable ledger maintained by adversaries you can't predict.</li>
+          </ul>
+          <p className="text-muted-foreground">
+            Bitcoin is pseudonymous by default and private only with
+            deliberate effort: fresh addresses per invoice, coinjoin,
+            payjoin, silent payments, Lightning. This scheme deliberately
+            throws all of that away. It takes the worst property of Bitcoin
+            (a transparent, append-only ledger that survives you) and pairs
+            it with the worst property of social media (a single
+            world-readable public identifier) and then ships it as a
+            feature.
+          </p>
+          <p className="text-muted-foreground">
+            The seven non-Bitcoin chains above are <em>worse</em>. Ethereum,
+            Dogecoin, Litecoin, BCH, BSV, ZEC's transparent addresses,
+            Cosmos — every transaction, every balance, every counterparty,
+            in clear text, forever, deterministically linked to your npub.
+            Some of those chains have no realistic privacy tooling at all.
+          </p>
+        </article>
+
+        {/* ── Section 3: Why on-chain zaps are TERRIBLE ───────────────── */}
+        <article className="space-y-3">
+          <h3 className="text-sm font-bold flex items-center gap-2">
+            <span className="text-destructive">3.</span>
+            Why on-chain zaps are TERRIBLE in every way
+          </h3>
+          <p className="text-muted-foreground">
+            The premise of a zap is a tiny, instant, expressive payment — a
+            like with skin in the game. Bitcoin's base layer cannot do this.
+            Not because it is underdeveloped, but because it was never meant
+            to. Pushing zaps onto L1 breaks on every axis that matters:
+          </p>
+          <ul className="space-y-2 text-muted-foreground list-disc pl-5">
+            <li>
+              <strong className="text-foreground">Fees.</strong> A typical
+              on-chain transaction costs anywhere from a few cents to several
+              dollars in mining fees. A 21-sat "love it" zap costs more in
+              fees than the zap itself — often by a factor of a thousand.
+              Lightning fees are sub-satoshi.
+            </li>
+            <li>
+              <strong className="text-foreground">Latency.</strong> First
+              confirmation: ~10 minutes. Reasonable finality: ~60 minutes.
+              Interactive tipping needs sub-second settlement. Lightning
+              provides this. L1 cannot.
+            </li>
+            <li>
+              <strong className="text-foreground">Throughput.</strong>{' '}
+              Bitcoin processes roughly 7 transactions per second, globally,
+              total. A single popular post can attract thousands of zaps
+              per minute. On-chain zaps don't scale; they evict actual
+              settlement transactions from blocks.
+            </li>
+            <li>
+              <strong className="text-foreground">Permanence.</strong> Every
+              zap — every dust amount, every petty squabble paid out — is
+              etched into every full node, every archive node, every block
+              explorer, forever, on every continent. There is no delete.
+            </li>
+            <li>
+              <strong className="text-foreground">Dust UTXOs.</strong>{' '}
+              Receiving 100 sats creates a UTXO that costs more to spend
+              than it contains. Your wallet fills with unspendable
+              splinters. The sender is paying you with a permanent liability.
+            </li>
+            <li>
+              <strong className="text-foreground">
+                No memo, no invoice, no amount negotiation.
+              </strong>{' '}
+              The chain doesn't carry message data. There is no expiry. No
+              "wait, wrong amount." Fat-finger an extra zero and the funds
+              are gone in ten minutes.
+            </li>
+            <li>
+              <strong className="text-foreground">No refunds.</strong> A
+              failed Lightning payment refunds atomically in seconds. A
+              misdirected on-chain payment refunds when the recipient feels
+              like it. If ever.
+            </li>
+            <li>
+              <strong className="text-foreground">
+                Censorship and surveillance.
+              </strong>{' '}
+              Miners see every transaction. Mining pools are increasingly
+              regulated and increasingly willing to filter the mempool. Your
+              zap is OFAC-screened before it confirms.
+            </li>
+            <li>
+              <strong className="text-foreground">Forced address reuse.</strong>{' '}
+              Lightning hides recipient identity entirely. Silent Payments
+              rotate per-payment. BIP-32 wallets rotate per-invoice.
+              On-chain zaps to derived npub addresses reuse the same
+              address, every time, for every payment, from every sender. It
+              is the worst possible address-management discipline, made
+              mandatory.
+            </li>
+            <li>
+              <strong className="text-foreground">
+                Permanent social-graph leak.
+              </strong>{' '}
+              Every zap is a public, signed, timestamped link between two
+              npubs <em>and</em> two on-chain identities. You are
+              constructing, on your own initiative, a court-admissible
+              social graph in a public registry.
+            </li>
+            <li>
+              <strong className="text-foreground">
+                Chain analysis as a service.
+              </strong>{' '}
+              The npub-to-address mapping is deterministic and
+              well-documented. Every chain-analysis firm on earth gets a
+              free clustering oracle. There is no opting out — except by
+              not using this.
+            </li>
+          </ul>
+          <p className="text-muted-foreground">
+            Lightning exists. NIP-57 exists. They were designed for this
+            problem and they solve it. Kind 8333 on-chain zaps were
+            designed as a thought experiment about what happens when you
+            don't use them. Treat them accordingly.
+          </p>
+        </article>
+
+        {/* Closing — bring the snark back, but only after the lesson lands. */}
+        <p className="text-[11px] text-muted-foreground/70 italic text-center pt-2">
+          tl;dr: the "Cross-Chain Integration™" banner above is a joke. The
+          bullet points here are not. If you actually want to tip someone on
+          Nostr, use a Lightning zap.
+        </p>
+      </div>
+    </section>
   );
 }
 
