@@ -9,6 +9,8 @@ import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useEventStats } from '@/hooks/useTrending';
 import { useUserZap } from '@/hooks/useUserZap';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
+import { useShitcoinZapsForEvent } from '@/hooks/useShitcoinZapsForEvent';
+import { ShitcoinZapPills } from '@/components/ShitcoinZapPills';
 import { formatNumber } from '@/lib/formatNumber';
 import { isPeopleListKind, parsePeopleList } from '@/lib/packUtils';
 import { cn } from '@/lib/utils';
@@ -53,8 +55,14 @@ export function PostActionBar({
   const { data: stats } = useEventStats(event.id, event);
   const repostTotal = (stats?.reposts ?? 0) + (stats?.quotes ?? 0);
   const { format: formatMoney } = useFormatMoney();
+  // Shitcoin kind-8333 zaps targeting this post. Subtract their atomic
+  // amounts from the BTC aggregate so the $ display is correct, then render
+  // per-chain pills below the action row.
+  const shitcoinBreakdown = useShitcoinZapsForEvent(event);
+  const correctedZapAmount = Math.max(0, (stats?.zapAmount ?? 0) - shitcoinBreakdown.totalAtomic);
 
   return (
+    <div>
     <div className={`flex items-center justify-between py-1 border-t border-b border-border${className ? ` ${className}` : ''}`}>
       {/* Reply / Comments */}
       <button
@@ -113,8 +121,8 @@ export function PostActionBar({
               className={compact ? "size-[18px] sm:size-5" : "size-5"}
               fill={isZapped ? 'currentColor' : 'none'}
             />
-            {stats?.zapAmount ? (
-              <span className="text-sm tabular-nums">{formatMoney(stats.zapAmount, { layout: 'compact' })}</span>
+            {correctedZapAmount > 0 ? (
+              <span className="text-sm tabular-nums">{formatMoney(correctedZapAmount, { layout: 'compact' })}</span>
             ) : null}
           </button>
         </ZapMenu>
@@ -129,6 +137,8 @@ export function PostActionBar({
       >
         <MoreHorizontal className={compact ? "size-[18px] sm:size-5" : "size-5"} />
       </button>
+    </div>
+    {shitcoinBreakdown.chains.length > 0 && <ShitcoinZapPills breakdown={shitcoinBreakdown} />}
     </div>
   );
 }

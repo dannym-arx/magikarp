@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, useCallback, forwardRef } from 'react';
-import { Zap, Copy, Check, ExternalLink, X, Bitcoin, Loader2 } from 'lucide-react';
+import { Zap, Copy, Check, ExternalLink, X, Bitcoin, Loader2, Coins } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { openUrl } from '@/lib/downloadFile';
 import { impactMedium } from '@/lib/haptics';
@@ -16,6 +16,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { QRCodeCanvas } from '@/components/ui/qrcode';
 import { OnchainZapContent } from '@/components/OnchainZapContent';
+import { ShitcoinZapContent } from '@/components/ShitcoinZapContent';
 import { ZapSuccessScreen } from '@/components/ZapSuccessScreen';
 import { useCurrentUser } from '@/hooks/useCurrentUser';
 import { useAuthor } from '@/hooks/useAuthor';
@@ -392,7 +393,7 @@ export function ZapDialog({
   const { capability: btcCapability } = useBitcoinSigner();
   const hasLightning = canZap(author?.metadata);
   const bitcoinUnsupported = btcCapability === 'unsupported';
-  const [activeTab, setActiveTab] = useState<'onchain' | 'lightning'>(
+  const [activeTab, setActiveTab] = useState<'onchain' | 'lightning' | 'chains'>(
     bitcoinUnsupported && hasLightning ? 'lightning' : 'onchain',
   );
 
@@ -533,7 +534,7 @@ export function ZapDialog({
           </div>
         </DialogTrigger>
       )}
-      <DialogContent className="max-w-[425px] rounded-2xl p-0 gap-0 border-border overflow-hidden max-h-[95vh] [&>button]:hidden" data-testid="zap-modal">
+      <DialogContent className="max-w-[560px] rounded-2xl p-0 gap-0 border-border overflow-hidden max-h-[95vh] [&>button]:hidden" data-testid="zap-modal">
         <div className="flex items-center justify-between px-4 h-12">
           <DialogTitle className="text-base font-semibold flex items-center gap-1.5">
             {success
@@ -542,8 +543,10 @@ export function ZapDialog({
                 ? `Donate to ${campaign.title}`
                 : invoice
                   ? 'Lightning Payment'
-                  : 'Send Bitcoin'}{' '}
-            {!success && !campaign && (
+                  : activeTab === 'chains'
+                    ? 'Send Shitcoin'
+                    : 'Send Bitcoin'}{' '}
+            {!success && !campaign && activeTab !== 'chains' && (
               <HelpTip
                 faqId={
                   invoice || activeTab === 'lightning'
@@ -570,15 +573,25 @@ export function ZapDialog({
               txid={success.kind === 'onchain' ? success.txid : undefined}
               onClose={() => setOpen(false)}
             />
-          ) : !campaign && hasLightning ? (
-            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'onchain' | 'lightning')} className="w-full">
+          ) : !campaign ? (
+            // The Chains tab is always available for profile zaps: every npub
+            // deterministically maps to addresses on seven other secp256k1
+            // chains, so no recipient-specific gating is needed. Campaigns
+            // (kind 33863) skip the tab system entirely — they route through
+            // the campaign's declared `w` endpoint, which is a BTC concept.
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'onchain' | 'lightning' | 'chains')} className="w-full">
               <div className="px-4 pt-2">
-                <TabsList className="grid w-full grid-cols-2 h-9">
+                <TabsList className={`grid w-full ${hasLightning ? 'grid-cols-3' : 'grid-cols-2'} h-9`}>
                   <TabsTrigger value="onchain" className="gap-1.5 text-xs">
                     <Bitcoin className="size-3.5" /> Bitcoin
                   </TabsTrigger>
-                  <TabsTrigger value="lightning" className="gap-1.5 text-xs">
-                    <Zap className="size-3.5" /> Lightning
+                  {hasLightning && (
+                    <TabsTrigger value="lightning" className="gap-1.5 text-xs">
+                      <Zap className="size-3.5" /> Lightning
+                    </TabsTrigger>
+                  )}
+                  <TabsTrigger value="chains" className="gap-1.5 text-xs">
+                    <Coins className="size-3.5" /> Chains
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -591,16 +604,21 @@ export function ZapDialog({
                   onClose={() => setOpen(false)}
                 />
               </TabsContent>
-              <TabsContent value="lightning" className="mt-0">
-                <LightningZapContent {...lightningContentProps} />
+              {hasLightning && (
+                <TabsContent value="lightning" className="mt-0">
+                  <LightningZapContent {...lightningContentProps} />
+                </TabsContent>
+              )}
+              <TabsContent value="chains" className="mt-0">
+                <ShitcoinZapContent target={target} />
               </TabsContent>
             </Tabs>
           ) : (
-            // Campaign donations (kind 33863) and authors with no Lightning
-            // address share the same single-pane on-chain UI. Campaigns
-            // route the send through the campaign's `w` endpoint via the
-            // `campaign` prop; profile zaps fall back to the derived
-            // Taproot address of the target author.
+            // Campaign donations (kind 33863) keep the single-pane on-chain
+            // UI. The campaign routes the send through its `w` endpoint via
+            // the `campaign` prop. Cross-chain zaps deliberately don't apply
+            // here — campaigns are a BTC-only concept and shoehorning seven
+            // shitcoins into them would dilute the joke.
             <OnchainZapContent
               target={target}
               campaign={campaign ?? undefined}

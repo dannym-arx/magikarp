@@ -117,6 +117,8 @@ import { useProfileUrl } from "@/hooks/useProfileUrl";
 import { useEventStats } from "@/hooks/useTrending";
 import { useUserZap } from "@/hooks/useUserZap";
 import { useFormatMoney } from "@/hooks/useFormatMoney";
+import { useShitcoinZapsForEvent } from "@/hooks/useShitcoinZapsForEvent";
+import { ShitcoinZapPills } from "@/components/ShitcoinZapPills";
 import { extractZapMessage } from "@/hooks/useEventInteractions";
 import { getZapAmountSats, getZapSenderPubkey } from "@/lib/zapHelpers";
 import { extractOnchainZapRecipients } from "@/hooks/useOnchainZaps";
@@ -389,6 +391,12 @@ export const NoteCard = memo(function NoteCard({
   const profileUrl = useProfileUrl(event.pubkey, metadata);
   const encodedId = useMemo(() => encodeEventAddress(event), [event]);
   const { data: stats } = useEventStats(event.id, event);
+  // Shitcoin kind-8333 zaps targeting this post. We use the breakdown to (a)
+  // subtract chain-native atomic amounts from the BTC-sats aggregate so the
+  // displayed dollar value isn't inflated by treating, say, 25 DOGE
+  // (2,500,000,000 atomic units) as 25 BTC, and (b) render a per-chain pills
+  // row under the action bar.
+  const shitcoinZapBreakdown = useShitcoinZapsForEvent(event);
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [replyOpen, setReplyOpen] = useState(false);
   // Separate modal state for the profile-zap action bar, which targets the
@@ -423,7 +431,7 @@ export const NoteCard = memo(function NoteCard({
 
   // Money formatter (USD by default, with sats fallback). Reused for the
   // "X zapped Y" wrapper header and the kind 9735 zap-receipt card below.
-  const { format: formatMoney } = useFormatMoney();
+  const { format: formatMoney, formatZap } = useFormatMoney();
 
   const { onClick: openPost, onAuxClick: auxOpenPost } = useOpenPost(
     `/${encodedId}`,
@@ -873,7 +881,20 @@ export const NoteCard = memo(function NoteCard({
     const zd = opts?.zapped ?? isZapped;
     const reply = opts?.onReply ?? (() => setReplyOpen(true));
     const more = opts?.onMore ?? (() => setMoreMenuOpen(true));
+    // Only apply the shitcoin correction when rendering the action bar for
+    // the primary event — the multi-recipient profile-targeted layout
+    // (`opts.target = recipientEvent`) is keyed to a kind-0 event id that
+    // won't have shitcoin zaps attached. Use an empty breakdown there.
+    const breakdown = t.id === event.id
+      ? shitcoinZapBreakdown
+      : { perChainAtomic: {}, perChainCoins: {}, totalAtomic: 0, chains: [], count: 0, entries: [], isLoading: false };
+    // Subtract shitcoin atomic amounts from the BTC aggregate. The NIP-85
+    // server treats every kind-8333 `amount` tag as BTC sats, so a 25 DOGE
+    // zap (2,500,000,000 atomic units) inflates the aggregate by 25 BTC.
+    // Clamp to 0 in case the server-side correction is even more wrong.
+    const correctedZapAmount = Math.max(0, (s?.zapAmount ?? 0) - breakdown.totalAtomic);
     return (
+      <>
       <div className={cn("flex items-center mt-3 -ml-2", showBlobbiInteract ? "gap-4 sm:gap-5" : "gap-5")}>
         <button
           type="button"
@@ -937,9 +958,9 @@ export const NoteCard = memo(function NoteCard({
                 className={showBlobbiInteract ? "size-[18px] sm:size-5" : "size-5"}
                 fill={zd ? "currentColor" : "none"}
               />
-              {s?.zapAmount ? (
+              {correctedZapAmount > 0 ? (
                 <span className="text-sm tabular-nums">
-                  {formatMoney(s.zapAmount, { layout: 'compact' })}
+                  {formatMoney(correctedZapAmount, { layout: 'compact' })}
                 </span>
               ) : null}
             </button>
@@ -958,6 +979,8 @@ export const NoteCard = memo(function NoteCard({
           <MoreHorizontal className={showBlobbiInteract ? "size-[18px] sm:size-5" : "size-5"} />
         </button>
       </div>
+      {breakdown.chains.length > 0 && <ShitcoinZapPills breakdown={breakdown} />}
+      </>
     );
   };
 
@@ -1057,7 +1080,7 @@ export const NoteCard = memo(function NoteCard({
       actionEvent={zappedBy.event}
       extra={zappedBy.sats > 0 ? (
         <span className="font-semibold text-amber-500">
-          {formatMoney(zappedBy.sats)}
+          {formatZap(zappedBy.event)}
         </span>
       ) : undefined}
     />
@@ -1113,7 +1136,7 @@ export const NoteCard = memo(function NoteCard({
           actionEvent={event}
           extra={zapSats > 0 ? (
             <span className="font-semibold text-amber-500">
-              {formatMoney(zapSats)}
+              {formatZap(event)}
             </span>
           ) : undefined}
         />
@@ -1282,7 +1305,7 @@ export const NoteCard = memo(function NoteCard({
             timestampLabel={timeAgo(event.created_at)}
             extra={zapAmountSats > 0 ? (
               <span className="text-sm font-semibold text-amber-500 shrink-0">
-                {formatMoney(zapAmountSats)}
+                {formatZap(event)}
               </span>
             ) : undefined}
           />

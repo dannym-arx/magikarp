@@ -1,5 +1,122 @@
 import type { NostrEvent } from '@nostrify/nostrify';
 import { extractZapAmount } from '@/hooks/useEventInteractions';
+import { SHITCOIN_META, type ShitcoinId } from '@/lib/shitcoins';
+import { findErc20Token } from '@/lib/erc20Tokens';
+
+/**
+ * Atomic-units-per-coin for each chain. DOGE/LTC/BCH/BSV/ZEC use 8 decimals
+ * (sats-equivalent), ETH uses 18 (wei), ATOM uses 6 (uatom).
+ *
+ * Kept in this module rather than imported from `shitcoinBalances` so the
+ * zap-helpers stay independent of the balance-fetcher code path.
+ */
+const SHITCOIN_DECIMALS: Record<ShitcoinId, number> = {
+  DOGE: 8,
+  LTC: 8,
+  BCH: 8,
+  BSV: 8,
+  ZEC: 8,
+  ETH: 18,
+  ATOM: 6,
+};
+
+/**
+ * Information about a kind-8333 zap that targets a non-Bitcoin chain
+ * (DOGE/LTC/BCH/BSV/ETH/ZEC/ATOM). Returned by {@link getShitcoinZapInfo}.
+ */
+export interface ShitcoinZapInfo {
+  chain: ShitcoinId;
+  ticker: string;
+  /** Amount in whole-coin units (e.g. `25` for "25 DOGE", `1.5` for "1.5 USDT"). */
+  amount: number;
+  /** Atomic units exactly as stored in the event's `amount` tag. */
+  atomic: number;
+  /**
+   * ERC-20 token symbol when the kind-8333 event represents an ETH-chain
+   * token transfer (USDT/USDC/DAI/SHIB/PEPE/etc.). When set, `ticker`,
+   * decimals, and renderer hints come from the token registry rather than
+   * the chain. Always `undefined` for native chain transfers (DOGE, native
+   * ETH, etc.).
+   */
+  token?: string;
+  /** Display emoji — token emoji takes priority over chain emoji. */
+  emoji: string;
+}
+
+/**
+ * Detect a shitcoin kind-8333 zap and return its chain + amount in
+ * whole-coin units. Returns `null` for BTC zaps (the normal case), for any
+ * other kind, or when the event is malformed.
+ *
+ * Detection order:
+ *   1. The Magikarp-specific `chain` tag (e.g. `["chain","DOGE"]`).
+ *   2. The standard `i` tag's chain prefix (e.g. `dogecoin:tx:<txid>`).
+ *      This lets us correctly classify events authored by other clients
+ *      that follow the same convention.
+ *
+ * The amount tag is read as atomic units and divided by the chain's
+ * decimal exponent. JS doubles are safe for any plausible shitcoin
+ * balance.
+ */
+export function getShitcoinZapInfo(event: NostrEvent): ShitcoinZapInfo | null {
+  if (event.kind !== 8333) return null;
+
+  let chain: ShitcoinId | null = null;
+
+  // Fast path: explicit `chain` tag.
+  const chainTag = event.tags.find(([n]) => n === 'chain')?.[1];
+  if (chainTag && Object.prototype.hasOwnProperty.call(SHITCOIN_META, chainTag)) {
+    chain = chainTag as ShitcoinId;
+  }
+
+  // Fallback: parse the chain slug from the `i` tag prefix.
+  if (!chain) {
+    const iTag = event.tags.find(([n]) => n === 'i')?.[1];
+    if (iTag) {
+      const slug = iTag.split(':')[0];
+      for (const [id, meta] of Object.entries(SHITCOIN_META)) {
+        if (meta.coingeckoId === slug) {
+          chain = id as ShitcoinId;
+          break;
+        }
+      }
+    }
+  }
+
+  if (!chain) return null;
+
+  const amountTag = event.tags.find(([n]) => n === 'amount')?.[1];
+  if (!amountTag) return null;
+  const atomic = Number(amountTag);
+  if (!Number.isFinite(atomic)) return null;
+
+  // ERC-20 token override: if a `token` tag names a known token on the ETH
+  // chain, use its decimals + ticker + emoji instead of the chain's. This
+  // makes a "1 USDT" zap render as "1 USDT" (with USDT's 6-decimal divisor)
+  // rather than as 0.000000000000000001 ETH.
+  const tokenTag = event.tags.find(([n]) => n === 'token')?.[1];
+  if (chain === 'ETH' && tokenTag) {
+    const token = findErc20Token(tokenTag);
+    if (token) {
+      return {
+        chain,
+        ticker: token.symbol,
+        amount: atomic / 10 ** token.decimals,
+        atomic,
+        token: token.symbol,
+        emoji: token.emoji,
+      };
+    }
+  }
+
+  return {
+    chain,
+    ticker: SHITCOIN_META[chain].ticker,
+    amount: atomic / 10 ** SHITCOIN_DECIMALS[chain],
+    atomic,
+    emoji: SHITCOIN_META[chain].emoji,
+  };
+}
 
 /**
  * Extracts the zap amount in sats from either a kind 9735 Lightning zap

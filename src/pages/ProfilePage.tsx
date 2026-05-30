@@ -113,6 +113,7 @@ import type { NostrEvent } from '@nostrify/nostrify';
 import QRCode from 'qrcode';
 import { isWeatherFieldLabel } from '@/lib/weatherStation';
 import { WeatherStationCard } from '@/components/WeatherStationCard';
+import { ProfileShitcoinBalances } from '@/components/ProfileShitcoinBalances';
 
 const STREAK_WINDOW_HOURS = 24;
 const STREAK_DISPLAY_LIMIT = 99;
@@ -2306,6 +2307,10 @@ type EditableTab = { label: string; isCore: boolean; tab?: ProfileTab };
                 </div>
               )}
 
+              {/* Shitcoin holdings — the privacy-leak made visible. Every npub
+                  is also a wallet on 7 chains; we show the balances under the
+                  profile because the addresses are derivable by anyone anyway. */}
+              {pubkey && <ProfileShitcoinBalances pubkey={pubkey} />}
 
             </>
           )}

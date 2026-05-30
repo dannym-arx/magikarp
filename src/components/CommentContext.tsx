@@ -755,7 +755,7 @@ function ReactionCommentContext({ event, className }: { event: NostrEvent; class
 function ZapCommentContext({ event, className }: { event: NostrEvent; className?: string }) {
   const sats = useMemo(() => getZapAmountSats(event), [event]);
   const senderPubkey = useMemo(() => getZapSenderPubkey(event), [event]);
-  const { format: formatMoney } = useFormatMoney();
+  const { formatZap } = useFormatMoney();
 
   const author = useAuthor(senderPubkey || undefined);
   const metadata = author.data?.metadata;
@@ -775,7 +775,7 @@ function ZapCommentContext({ event, className }: { event: NostrEvent; className?
       onClick={(e) => e.stopPropagation()}
     >
       <Zap className="size-3.5 shrink-0 text-amber-500" />
-      <span>{sats > 0 ? `${formatMoney(sats)} zap` : 'zap'}</span>
+      <span>{sats > 0 ? `${formatZap(event)} zap` : 'zap'}</span>
     </Link>
   );
 

@@ -18,6 +18,8 @@ import { CustomEmojiImg, EmojifiedText } from '@/components/CustomEmoji';
 import { isCustomEmoji } from '@/lib/customEmoji';
 import { useEventInteractions, type RepostEntry, type QuoteEntry, type ReactionEntry, type ZapEntry } from '@/hooks/useEventInteractions';
 import { useOnchainZaps, type OnchainZapEntry } from '@/hooks/useOnchainZaps';
+import { useShitcoinZapsForEvent, type ShitcoinZapEntry } from '@/hooks/useShitcoinZapsForEvent';
+import { formatShitcoinAmount } from '@/lib/shitcoinBalances';
 import { useAuthor } from '@/hooks/useAuthor';
 import { VerifiedNip05Text } from '@/components/Nip05Badge';
 import { timeAgo } from '@/lib/timeAgo';
@@ -25,7 +27,10 @@ import { formatNumber } from '@/lib/formatNumber';
 import { useFormatMoney } from '@/hooks/useFormatMoney';
 import { cn } from '@/lib/utils';
 
-export type InteractionTab = 'reposts' | 'quotes' | 'reactions' | 'zaps';
+export type InteractionTab = 'reposts' | 'quotes' | 'reactions' | 'zaps' | 'shits';
+
+/** The font stack used across shitcoin UI surfaces. */
+const DOGE_FONT = '"Comic Neue", "Comic Sans MS", "Chalkboard SE", "Marker Felt", cursive, sans-serif';
 
 /**
  * Unified zap row view-model. Kind 9735 (Lightning receipts) and kind 8333
@@ -66,6 +71,7 @@ export function InteractionsModal({ target, open, onOpenChange, initialTab = 're
   const { zaps: onchainZaps, isLoading: isLoadingOnchain } = useOnchainZaps(
     open ? target : undefined,
   );
+  const shitcoinBreakdown = useShitcoinZapsForEvent(open ? target : undefined);
 
   // Sync active tab whenever initialTab changes (e.g. clicking a different stat while modal is already open)
   useEffect(() => {
@@ -87,17 +93,22 @@ export function InteractionsModal({ target, open, onOpenChange, initialTab = 're
   const quoteCount = data?.quotes.length ?? 0;
   const reactionCount = data?.reactions.length ?? 0;
   const zapCount = unifiedZaps.length;
+  const shitCount = shitcoinBreakdown.count;
 
   const tabConfig: { key: InteractionTab; label: string; count: number; icon: React.ReactNode }[] = [
     { key: 'reposts', label: 'Reposts', count: repostCount, icon: <RepostIcon className="size-4" /> },
     { key: 'quotes', label: 'Quotes', count: quoteCount, icon: <Quote className="size-4" /> },
     { key: 'reactions', label: 'Reactions', count: reactionCount, icon: <Heart className="size-4" /> },
     { key: 'zaps', label: 'Zaps', count: zapCount, icon: <Zap className="size-4" /> },
+    // 5th tab — only shitcoin kind-8333 zaps (non-Bitcoin chains). Lives
+    // alongside Zaps because they're a separate UX from BTC sats (chain-
+    // native units, chain-specific explorer links).
+    { key: 'shits', label: 'Shit Zaps', count: shitCount, icon: <span aria-hidden className="text-base leading-none">💩</span> },
   ];
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-       <DialogContent className="max-w-[460px] rounded-2xl p-0 gap-0 border-border overflow-hidden [&>button]:hidden">
+       <DialogContent className="max-w-[560px] rounded-2xl p-0 gap-0 border-border overflow-hidden [&>button]:hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-4 h-12">
           <DialogTitle className="text-base font-semibold">Post interactions</DialogTitle>
@@ -151,8 +162,10 @@ export function InteractionsModal({ target, open, onOpenChange, initialTab = 're
             <QuotesTab quotes={data?.quotes ?? []} />
           ) : activeTab === 'reactions' ? (
             <ReactionsTab reactions={data?.reactions ?? []} />
-          ) : (
+          ) : activeTab === 'zaps' ? (
             <ZapsTab zaps={unifiedZaps} />
+          ) : (
+            <ShitZapsTab entries={shitcoinBreakdown.entries} />
           )}
         </ScrollArea>
       </DialogContent>
@@ -273,6 +286,129 @@ function ZapsTab({ zaps }: { zaps: UnifiedZap[] }) {
         ))}
       </div>
     </div>
+  );
+}
+
+/* ──── Shit Zaps Tab ──── */
+/**
+ * Per-event shitcoin zap list (kind 8333 events targeting non-Bitcoin
+ * chains). Grouped header shows per-chain totals and total zap count;
+ * rows show sender + chain + amount in chain-native units.
+ */
+function ShitZapsTab({ entries }: { entries: ShitcoinZapEntry[] }) {
+  // Per-chain totals reduced from entries — keeps the tab self-sufficient.
+  const perChainTotals = useMemo(() => {
+    const map = new Map<string, { emoji: string; ticker: string; total: number; count: number }>();
+    for (const e of entries) {
+      const existing = map.get(e.chain);
+      if (existing) {
+        existing.total += e.amount;
+        existing.count += 1;
+      } else {
+        map.set(e.chain, { emoji: e.emoji, ticker: e.ticker, total: e.amount, count: 1 });
+      }
+    }
+    return Array.from(map.entries()).map(([chain, v]) => ({ chain, ...v }));
+  }, [entries]);
+
+  if (entries.length === 0) {
+    return <EmptyState message="No shit zaps yet. wen? wen?" />;
+  }
+
+  return (
+    <div>
+      {/* Header summary — chain pill row + total count. Mirrors the ZapsTab
+          summary header but shows per-chain breakdowns instead of a single
+          $-figure (units differ across chains so a single $ total would
+          require live price multi-fetch — kept simple). */}
+      <div className="px-4 py-3 bg-amber-50 dark:bg-amber-950/30 border-b border-border">
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <span
+            className="text-base font-bold text-amber-700 dark:text-amber-300"
+            style={{ fontFamily: DOGE_FONT }}
+          >
+            💩 Shit Zaps 💩
+          </span>
+          <span className="text-xs text-muted-foreground" style={{ fontFamily: DOGE_FONT }}>
+            {entries.length} zap{entries.length === 1 ? '' : 's'}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          {perChainTotals.map((t) => (
+            <span
+              key={t.chain}
+              className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs text-amber-800 dark:text-amber-200 bg-white/70 dark:bg-amber-900/40 border border-amber-300/50"
+              style={{ fontFamily: DOGE_FONT }}
+            >
+              <span aria-hidden>{t.emoji}</span>
+              <span className="tabular-nums">{formatShitcoinAmount(t.total, t.chain as never)}</span>
+              <span className="uppercase">{t.ticker}</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="divide-y divide-border">
+        {entries.map((entry) => (
+          <ShitZapRow key={entry.event.id} entry={entry} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ShitZapRow({ entry }: { entry: ShitcoinZapEntry }) {
+  const author = useAuthor(entry.senderPubkey);
+  const metadata = author.data?.metadata;
+  const avatarShape = getAvatarShape(metadata);
+  const displayName = metadata?.name || metadata?.display_name || 'Anonymous';
+  const nevent = useMemo(
+    () => nip19.neventEncode({ id: entry.event.id, author: entry.senderPubkey }),
+    [entry.event.id, entry.senderPubkey],
+  );
+
+  return (
+    <Link
+      to={`/${nevent}`}
+      className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/30 transition-colors"
+    >
+      <Avatar shape={avatarShape} className="size-10 shrink-0">
+        <AvatarImage src={metadata?.picture} alt={displayName} />
+        <AvatarFallback className="bg-primary/20 text-primary text-sm">
+          {displayName[0]?.toUpperCase() ?? '?'}
+        </AvatarFallback>
+      </Avatar>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <span className="font-bold text-sm truncate">
+            {author.data?.event ? (
+              <EmojifiedText tags={author.data.event.tags}>{displayName}</EmojifiedText>
+            ) : displayName}
+          </span>
+          {metadata?.nip05 && (
+            <VerifiedNip05Text nip05={metadata.nip05} pubkey={entry.senderPubkey} className="text-xs text-muted-foreground truncate" />
+          )}
+        </div>
+        <span className="text-xs text-muted-foreground">{timeAgo(entry.createdAt)}</span>
+      </div>
+
+      <div className="flex flex-col items-end shrink-0">
+        <span
+          className="text-sm font-bold text-amber-700 dark:text-amber-300 tabular-nums"
+          style={{ fontFamily: DOGE_FONT }}
+        >
+          <span className="mr-1" aria-hidden>{entry.emoji}</span>
+          {formatShitcoinAmount(entry.amount, entry.chain)} {entry.ticker}
+        </span>
+        <span
+          className="text-[10px] uppercase tracking-wider text-muted-foreground"
+          style={{ fontFamily: DOGE_FONT }}
+        >
+          {entry.name}
+        </span>
+      </div>
+    </Link>
   );
 }
 
