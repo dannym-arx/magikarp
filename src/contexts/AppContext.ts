@@ -316,6 +316,17 @@ export interface AppConfig {
    */
   esploraApis: string[];
   /**
+   * Ethereum JSON-RPC endpoint used to look up native ETH balance and
+   * enumerate every ERC-20 the derived ETH address holds. Defaults to
+   * Alchemy's public `demo` key, which is rate-limited but key-free.
+   * Configure your own at https://www.alchemy.com/ for higher limits.
+   *
+   * The endpoint must implement standard `eth_*` methods *and* Alchemy's
+   * `alchemy_getTokenBalances` / `alchemy_getTokenMetadata` extensions
+   * (Infura, QuickNode, etc. that mirror these methods will also work).
+   */
+  alchemyRpc: string;
+  /**
    * How to display monetary amounts (zap totals, wallet balances, etc.).
    * "usd" converts sats to USD via the current BTC price; "sats" shows raw
    * satoshi amounts. Default: "usd".

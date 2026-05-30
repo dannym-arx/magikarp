@@ -158,6 +158,7 @@ const hardcodedConfig: AppConfig = {
   curatorPubkey: '932614571afcbad4d17a191ee281e39eebbb41b93fac8fd87829622aeb112f4d',
   sandboxDomain: 'iframe.diy',
   esploraApis: [...DEFAULT_ESPLORA_APIS],
+  alchemyRpc: 'https://eth-mainnet.g.alchemy.com/v2/demo',
   currencyDisplay: 'usd',
   sidebarWidgets: [
     { id: 'trends' },

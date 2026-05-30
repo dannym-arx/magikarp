@@ -126,6 +126,7 @@ export function TestApp({ children }: TestAppProps) {
     imageQuality: 'compressed',
     sandboxDomain: 'iframe.diy',
     esploraApis: ['https://mempool.space/api'],
+    alchemyRpc: 'https://eth-mainnet.g.alchemy.com/v2/demo',
     currencyDisplay: 'usd',
     sidebarWidgets: [],
   };
